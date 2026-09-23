@@ -31,6 +31,7 @@ const updateUserZodSchema = z.object({
     .object({
       firstName: z.string().optional(),
       lastName: z.string().optional(),
+      image: z.string().url().optional(),
       phone: z
         .object({
           countryCode: z.string().min(1).max(5).optional(),
@@ -54,7 +55,6 @@ const updateUserZodSchema = z.object({
         })
         .optional(),
       isNotificationEnabled: z.boolean().optional(),
-      image: z.string().url().optional(),
     })
     .strict(),
 });

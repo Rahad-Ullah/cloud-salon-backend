@@ -3,29 +3,27 @@ import auth from '../../middlewares/auth';
 import validateRequest from '../../middlewares/validateRequest';
 import { UserController } from './user.controller';
 import { UserValidation } from './user.validation';
-import fileUploadHandler from '../../middlewares/fileUploadHandler';
 import { UserRole } from './user.constant';
 const router = express.Router();
 
 // create user
 router.post(
-  '/create-user',
+  '/register',
   validateRequest(UserValidation.createUserZodSchema),
   UserController.createUser,
 );
 
 // update profile
 router.patch(
-  '/profile',
+  '/me',
   auth(),
-  fileUploadHandler(),
   validateRequest(UserValidation.updateUserZodSchema),
   UserController.updateProfile,
 );
 
 // update user status
 router.patch(
-  '/status/:id',
+  '/:id/status',
   auth(UserRole.Admin, UserRole.SuperAdmin),
   validateRequest(UserValidation.updateStatusZodSchema),
   UserController.updateStatus,
@@ -40,7 +38,7 @@ router.delete(
 );
 
 // get profile
-router.get('/profile', auth(), UserController.getUserProfile);
+router.get('/me', auth(), UserController.getUserProfile);
 
 // get single user
 router.get(
@@ -53,7 +51,7 @@ router.get(
 // get all users
 router.get(
   '/all',
-  auth(UserRole.Merchant, UserRole.Admin, UserRole.SuperAdmin),
+  auth(UserRole.Admin, UserRole.SuperAdmin),
   UserController.getAllUsers,
 );
 

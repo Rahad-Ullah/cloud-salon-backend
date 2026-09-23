@@ -34,8 +34,8 @@ const createUserToDB = async (payload: Partial<IUser>) => {
       throw new ApiError(StatusCodes.BAD_REQUEST, 'Failed to create user');
     }
 
-    // Create merchant profile
-    if (createdUser.role === UserRole.Merchant) {
+    // Create professional profile
+    if (createdUser.role === UserRole.Professional) {
       // const [merchant] = await Merchant.create([{ user: createdUser._id }], {
       //   session,
       // });
@@ -56,7 +56,7 @@ const createUserToDB = async (payload: Partial<IUser>) => {
     }
 
     // Generate OTP
-    const otp = generateOTP(4);
+    const otp = generateOTP(6);
     const values = {
       name: createdUser.firstName,
       otp: otp,
@@ -91,13 +91,13 @@ const createUserToDB = async (payload: Partial<IUser>) => {
   }
 };
 
-const getSingleUserFromDB = async (id: string, user: JwtPayload) => {
-  const existingUser = await User.findById(id).populate('roleRef');
-  if (!existingUser) {
+const getSingleUserFromDB = async (id: string) => {
+  const result = await User.findById(id).populate('roleRef');
+  if (!result) {
     throw new ApiError(StatusCodes.BAD_REQUEST, "User doesn't exist!");
   }
 
-  return existingUser;
+  return result;
 };
 
 const getProfileFromDB = async (id: string): Promise<Partial<IUser>> => {
@@ -135,7 +135,7 @@ const updateProfileToDB = async (
     throw new ApiError(StatusCodes.BAD_REQUEST, "User doesn't exist!");
   }
 
-  const updateDoc = await User.findOneAndUpdate({ _id: id }, payload, {
+  const result = await User.findByIdAndUpdate(id, payload, {
     new: true,
   });
 
@@ -150,10 +150,10 @@ const updateProfileToDB = async (
     existingUser.image &&
     payload.image !== existingUser.image
   ) {
-    deleteS3File(existingUser.image);
+    deleteS3File(existingUser.image).catch(err => console.error(err));
   }
 
-  return updateDoc;
+  return result;
 };
 
 // ------------ update user status ------------
@@ -161,25 +161,22 @@ const updateStatusToDB = async (
   id: string,
   payload: { status: UserStatus },
 ): Promise<Partial<IUser | null>> => {
-  const isExistUser = await User.exists({ _id: id });
-  if (!isExistUser) {
-    throw new ApiError(StatusCodes.BAD_REQUEST, "User doesn't exist!");
-  }
+  const result = await User.findByIdAndUpdate(id, payload, { new: true });
 
-  const updateDoc = await User.findOneAndUpdate({ _id: id }, payload, {
-    new: true,
-  });
+  if (!result) {
+    throw new ApiError(StatusCodes.NOT_FOUND, 'User not found!');
+  }
 
   // send notification to user
   sendNotifications({
     type: NotificationType.AccountUpdated,
-    receiver: updateDoc?._id,
+    receiver: result?._id,
     title: 'Account Status Updated',
     message: `Your account has been ${payload.status.toLowerCase()}`,
-    referenceId: updateDoc?._id.toString(),
+    referenceId: result?._id.toString(),
   }).catch(err => console.error(err));
 
-  return updateDoc;
+  return result;
 };
 
 // ------------ delete user ------------
@@ -209,12 +206,12 @@ const getAllUsersFromDB = async (query: Record<string, unknown>) => {
     .paginate()
     .fields();
 
-  const [users, pagination] = await Promise.all([
+  const [data, pagination] = await Promise.all([
     userQuery.modelQuery.populate('roleRef').lean(),
     userQuery.getPaginationInfo(),
   ]);
 
-  return { users, pagination };
+  return { data, pagination };
 };
 
 export const UserService = {

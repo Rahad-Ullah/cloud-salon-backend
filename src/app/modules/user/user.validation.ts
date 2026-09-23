@@ -7,7 +7,7 @@ const createUserZodSchema = z.object({
     .object({
       firstName: z.string({ required_error: 'First name is required' }),
       lastName: z.string({ required_error: 'Last name is required' }),
-      role: z.enum([UserRole.User, UserRole.Merchant], {
+      role: z.enum([UserRole.Customer, UserRole.Professional], {
         required_error: 'Role is required',
       }),
       email: z
@@ -20,13 +20,6 @@ const createUserZodSchema = z.object({
         .object({
           countryCode: z.string().min(1).max(5).optional(),
           number: z.string().optional(),
-        })
-        .optional(),
-      address: z.string().optional(),
-      location: z
-        .object({
-          type: z.string().optional(),
-          coordinates: z.array(z.number()).optional(),
         })
         .optional(),
     })
@@ -44,7 +37,16 @@ const updateUserZodSchema = z.object({
           number: z.string().optional(),
         })
         .optional(),
-      address: z.string().optional(),
+      address: z
+        .object({
+          line1: z.string().optional(),
+          line2: z.string().optional(),
+          city: z.string().optional(),
+          state: z.string().optional(),
+          country: z.string().optional(),
+          postalCode: z.string().optional(),
+        })
+        .optional(),
       location: z
         .object({
           type: z.string().optional(),
@@ -57,17 +59,20 @@ const updateUserZodSchema = z.object({
     .strict(),
 });
 
-const updateStatusZodSchema = z
-  .object({
-    params: z.object({
+const updateStatusZodSchema = z.object({
+  params: z
+    .object({
       id: objectId('user id'),
-    }).strict(),
-    body: z.object({
+    })
+    .strict(),
+  body: z
+    .object({
       status: z.nativeEnum(UserStatus, {
         required_error: 'Status is required',
       }),
-    }).strict(),
-  })
+    })
+    .strict(),
+});
 
 // delete user
 const deleteUserZodSchema = z.object({
@@ -80,18 +85,9 @@ const deleteUserZodSchema = z.object({
 
 // get single user
 const getSingleUserZodSchema = z.object({
-  params: z.object({
-    id: objectId('user id'),
-  }).strict(),
-});
-
-// get all care providers
-const getAllCareProvidersZodSchema = z.object({
-  query: z
+  params: z
     .object({
-      searchTerm: z.string().optional(),
-      page: z.string().optional(),
-      limit: z.string().optional(),
+      id: objectId('user id'),
     })
     .strict(),
 });

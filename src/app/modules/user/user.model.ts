@@ -32,6 +32,10 @@ const userSchema = new Schema<IUser, UserModal>(
       type: Schema.Types.ObjectId,
       refPath: 'roleModel',
     },
+    isSalonOwner: {
+      type: Boolean,
+      default: false,
+    },
     email: {
       type: String,
       required: true,
@@ -60,8 +64,30 @@ const userSchema = new Schema<IUser, UserModal>(
       },
     },
     address: {
-      type: String,
-      default: '',
+      line1: {
+        type: String,
+        default: '',
+      },
+      line2: {
+        type: String,
+        default: '',
+      },
+      city: {
+        type: String,
+        default: '',
+      },
+      state: {
+        type: String,
+        default: '',
+      },
+      country: {
+        type: String,
+        default: '',
+      },
+      postalCode: {
+        type: String,
+        default: '',
+      },
     },
     location: {
       type: {

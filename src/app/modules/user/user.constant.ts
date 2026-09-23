@@ -1,6 +1,6 @@
 export enum UserRole {
-  User = 'user',
-  Merchant = 'merchant',
+  Customer = 'customer',
+  Professional = 'professional',
   Admin = 'admin',
   SuperAdmin = 'super_admin',
 }
@@ -8,5 +8,5 @@ export enum UserRole {
 export enum UserStatus {
   Active = 'active',
   Inactive = 'inactive',
-  Blocked = 'blocked',
+  Banned = 'banned',
 }

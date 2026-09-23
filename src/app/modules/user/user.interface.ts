@@ -8,6 +8,7 @@ export interface IUser {
   lastName: string;
   role: UserRole;
   roleRef: Types.ObjectId;
+  isSalonOwner: boolean;
   email: string;
   password: string;
   image: string;
@@ -15,7 +16,14 @@ export interface IUser {
     countryCode: string;
     number: string;
   };
-  address: string;
+  address: {
+    line1: string;
+    line2: string;
+    city: string;
+    state: string;
+    country: string;
+    postalCode: string;
+  };
   location: {
     type: string;
     coordinates: [number, number];

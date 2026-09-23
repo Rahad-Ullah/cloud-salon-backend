@@ -7,23 +7,23 @@ const router = express.Router();
 
 // get user overview
 router.get(
-    '/overview/user',
-    auth(UserRole.User),
-    AnalyticsController.getUserOverview,
+  '/overview/user',
+  auth(UserRole.Customer),
+  AnalyticsController.getUserOverview,
 );
 
-// get merchant overview
+// get professional overview
 router.get(
-  '/overview/merchant',
-  auth(UserRole.Merchant),
+  '/overview/professional',
+  auth(UserRole.Professional),
   AnalyticsController.getMerchantOverview,
 );
 
 // get admin overview
 router.get(
-    '/overview/admin',
-    auth(UserRole.Admin, UserRole.SuperAdmin),
-    AnalyticsController.getAdminOverview
+  '/overview/admin',
+  auth(UserRole.Admin, UserRole.SuperAdmin),
+  AnalyticsController.getAdminOverview,
 );
 
 // get user growth

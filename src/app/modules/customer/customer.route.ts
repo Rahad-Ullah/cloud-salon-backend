@@ -10,7 +10,7 @@ const router = express.Router();
 // create customer
 router.post(
   '/create',
-  auth(UserRole.Merchant),
+  auth(UserRole.Professional),
   validateRequest(CustomerValidations.createCustomer),
   CustomerController.createCustomer,
 );
@@ -18,7 +18,7 @@ router.post(
 // update customer
 router.patch(
   '/:id',
-  auth(UserRole.Merchant),
+  auth(UserRole.Professional),
   validateRequest(CustomerValidations.updateCustomer),
   CustomerController.updateCustomer,
 );
@@ -26,7 +26,7 @@ router.patch(
 // delete customer
 router.delete(
   '/:id',
-  auth(UserRole.Merchant),
+  auth(UserRole.Professional),
   validateRequest(CustomerValidations.deleteCustomer),
   CustomerController.deleteCustomer,
 );
@@ -34,7 +34,7 @@ router.delete(
 // get my customers
 router.get(
   '/my-customers',
-  auth(UserRole.Merchant),
+  auth(UserRole.Professional),
   CustomerController.getMyCustomers,
 );
 

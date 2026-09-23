@@ -16,8 +16,8 @@ const getMerchantOverview = async (userId: string) => {
 // ---------------- admin dashboard overview -----------------
 const getAdminOverview = async () => {
   const [totalUsers, totalMerchants] = await Promise.all([
-    User.countDocuments({ role: UserRole.User, isDeleted: false }),
-    User.countDocuments({ role: UserRole.Merchant, isDeleted: false }),
+    User.countDocuments({ role: UserRole.Customer, isDeleted: false }),
+    User.countDocuments({ role: UserRole.Professional, isDeleted: false }),
   ]);
 
   return {

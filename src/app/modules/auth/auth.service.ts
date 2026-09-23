@@ -228,15 +228,15 @@ const verifyEmailToDB = async (payload: IVerifyEmail) => {
     );
 
     //create token ;
-    const createToken = cryptoToken();
+    const resetToken = cryptoToken();
     await ResetToken.create({
       user: isExistUser._id,
-      token: createToken,
+      token: resetToken,
       expireAt: new Date(Date.now() + 5 * 60 * 1000), // 5 min
     });
     message =
       'Verification Successful: Please securely store and utilize this code for reset password';
-    data = { resetToken: createToken };
+    data = { resetToken };
   }
   return { data, message };
 };

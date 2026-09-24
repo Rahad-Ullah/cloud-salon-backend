@@ -35,7 +35,7 @@ function createModule(name: string): void {
   const constantName = toConstantCase(name); // JOB_SEEKER
   const folderName = camelName; // jobSeeker
 
-  const folderPath = path.join(__dirname, 'app', 'modules', folderName);
+  const folderPath = path.join(process.cwd(), 'src', 'app', 'modules', folderName);
 
   // Create folder
   if (!fs.existsSync(folderPath)) {

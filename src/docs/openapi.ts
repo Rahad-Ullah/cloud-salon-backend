@@ -1,0 +1,30 @@
+import {
+  OpenAPIRegistry,
+  OpenApiGeneratorV3,
+} from '@asteasolutions/zod-to-openapi';
+import { registerAuthDocs } from '../app/modules/auth/auth.doc';
+
+export const registry = new OpenAPIRegistry();
+
+// Register Bearer Auth (optional, for secured endpoints)
+registry.registerComponent('securitySchemes', 'bearerAuth', {
+  type: 'http',
+  scheme: 'bearer',
+  bearerFormat: 'JWT',
+});
+
+export function generateOpenApiDocument() {
+  registerAuthDocs();
+
+  const generator = new OpenApiGeneratorV3(registry.definitions);
+
+  return generator.generateDocument({
+    openapi: '3.0.3',
+    info: {
+      title: 'Cloud Salon Backend API',
+      version: '1.0.0',
+      description: 'API documentation generated automatically from Zod schemas',
+    },
+    servers: [{ url: '/api/v1' }],
+  });
+}

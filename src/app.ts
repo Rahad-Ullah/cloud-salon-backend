@@ -1,11 +1,14 @@
-import cors from 'cors';
 import express, { Request, Response } from 'express';
 import { StatusCodes } from 'http-status-codes';
+import cors from 'cors';
+import swaggerUi from 'swagger-ui-express';
 import globalErrorHandler from './app/middlewares/globalErrorHandler';
-import router from './routes';
+import { stripeWebhookController } from './app/webhooks/stripe/stripe.controller';
+import { generateOpenApiDocument } from './docs/openapi';
 import { Morgan } from './shared/morgen';
 import config from './config';
-import { stripeWebhookController } from './app/webhooks/stripe/stripe.controller';
+import router from './routes';
+
 const app = express();
 
 // trust proxy to get client real ip
@@ -41,6 +44,18 @@ app.get('/', (req: Request, res: Response) => {
     <p style="text-align:center; color:#173616; font-family:Verdana;">${date}</p>
     `,
   );
+});
+
+// Generate doc once at server startup
+const openApiDoc = generateOpenApiDocument();
+
+// Serve the interactive Swagger UI
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(openApiDoc));
+
+// Route to raw JSON for Postman import
+app.get('/api-docs.json', (_req, res) => {
+  res.setHeader('Content-Type', 'application/json');
+  res.send(openApiDoc);
 });
 
 //global error handle

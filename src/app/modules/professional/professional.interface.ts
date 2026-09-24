@@ -18,4 +18,6 @@ export interface IProfessional {
   updatedAt: Date;
 }
 
-export type ProfessionalModel = Model<IProfessional>;
+export interface ProfessionalModel extends Model<IProfessional> {
+  isProfileFulfilled(professional: Partial<IProfessional>): boolean;
+}

@@ -17,6 +17,7 @@ import generateOTP from '../../../utils/generateOTP';
 import { ResetToken } from '../resetToken/resetToken.model';
 import { User } from '../user/user.model';
 import { UserRole, UserStatus } from '../user/user.constant';
+import { Professional } from '../professional/professional.model';
 
 //------------------ login service ------------------
 const loginUserFromDB = async (payload: ILoginData) => {
@@ -81,13 +82,13 @@ const loginUserFromDB = async (payload: ILoginData) => {
   );
 
   // attach profile fulfillment status
-  let isMerchantProfileFulfilled = true;
-  // if (isExistUser.role === UserRole.Merchant) {
-  //   const merchant = await Merchant.findOne({ user: isExistUser._id });
-  //   if (merchant) {
-  //     isMerchantProfileFulfilled = Merchant.isProfileFulfilled(merchant);
-  //   }
-  // }
+  let isProfileFulfilled = true;
+  if (isExistUser.role === UserRole.Professional) {
+    const professional = await Professional.findOne({ user: isExistUser._id });
+    if (professional) {
+      isProfileFulfilled = Professional.isProfileFulfilled(professional);
+    }
+  }
 
   return {
     accessToken,
@@ -95,7 +96,7 @@ const loginUserFromDB = async (payload: ILoginData) => {
     role: isExistUser.role,
     email: isExistUser.email,
     _id: isExistUser._id,
-    isMerchantProfileFulfilled,
+    isProfileFulfilled,
   };
 };
 
@@ -198,13 +199,15 @@ const verifyEmailToDB = async (payload: IVerifyEmail) => {
     );
 
     // attach profile fulfillment status
-    let isMerchantProfileFulfilled = true;
-    // if (isExistUser.role === UserRole.Merchant) {
-    //   const merchant = await Merchant.findOne({ user: isExistUser._id });
-    //   if (merchant) {
-    //     isMerchantProfileFulfilled = Merchant.isProfileFulfilled(merchant);
-    //   }
-    // }
+    let isProfileFulfilled = true;
+    if (isExistUser.role === UserRole.Professional) {
+      const professional = await Professional.findOne({
+        user: isExistUser._id,
+      });
+      if (professional) {
+        isProfileFulfilled = Professional.isProfileFulfilled(professional);
+      }
+    }
 
     message = 'Email verify successfully';
     data = {
@@ -213,7 +216,7 @@ const verifyEmailToDB = async (payload: IVerifyEmail) => {
       role: isExistUser.role,
       email: isExistUser.email,
       _id: isExistUser._id,
-      isMerchantProfileFulfilled,
+      isProfileFulfilled,
     };
   } else {
     await User.findOneAndUpdate(

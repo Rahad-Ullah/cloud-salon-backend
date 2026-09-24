@@ -30,6 +30,44 @@ professionalSchema.plugin(autoIncrementPlugin, {
   padLength: 6,
 });
 
+// statics: check profile fulfillment
+professionalSchema.statics.isProfileFulfilled = function (
+  professional: Partial<IProfessional>,
+): boolean {
+  if (!professional) return false;
+
+  const hasBasicDetails = Boolean(
+    professional.title?.trim() &&
+    professional.bio?.trim() &&
+    professional.quote?.trim(),
+  );
+
+  const hasExperienceAndPricing = Boolean(
+    professional.experienceYears !== undefined &&
+    professional.experienceYears >= 0 &&
+    professional.startingPriceInUSD !== undefined &&
+    professional.startingPriceInUSD > 0,
+  );
+
+  const hasSpecialties = Boolean(
+    professional.specialties &&
+    Array.isArray(professional.specialties) &&
+    professional.specialties.length > 0 &&
+    professional.specialties.some(s => s.trim().length > 0),
+  );
+
+  const hasPhotos = Boolean(
+    professional.photos &&
+    Array.isArray(professional.photos) &&
+    professional.photos.length > 0 &&
+    professional.photos.some(p => p.trim().length > 0),
+  );
+
+  return (
+    hasBasicDetails && hasExperienceAndPricing && hasSpecialties && hasPhotos
+  );
+};
+
 export const Professional = model<IProfessional, ProfessionalModel>(
   'Professional',
   professionalSchema,

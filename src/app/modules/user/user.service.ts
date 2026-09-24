@@ -13,6 +13,7 @@ import mongoose from 'mongoose';
 import { sendNotifications } from '../../../helpers/notificationHelper';
 import { NotificationType } from '../notification/notification.constant';
 import { MediaUploadServices } from '../mediaUpload/mediaUpload.service';
+import { Professional } from '../professional/professional.model';
 
 const createUserToDB = async (payload: Partial<IUser>) => {
   const session = await mongoose.startSession();
@@ -36,23 +37,23 @@ const createUserToDB = async (payload: Partial<IUser>) => {
 
     // Create professional profile
     if (createdUser.role === UserRole.Professional) {
-      // const [merchant] = await Merchant.create([{ user: createdUser._id }], {
-      //   session,
-      // });
-      // if (!merchant) {
-      //   throw new ApiError(
-      //     StatusCodes.BAD_REQUEST,
-      //     'Failed to create merchant profile',
-      //   );
-      // }
-      // const updatedUser = await User.findByIdAndUpdate(
-      //   { _id: createdUser._id },
-      //   { $set: { roleRef: merchant._id } },
-      //   { session, new: true },
-      // );
-      // if (!updatedUser) {
-      //   throw new ApiError(StatusCodes.BAD_REQUEST, 'Failed to update user');
-      // }
+      const [professional] = await Professional.create([{ user: createdUser._id }], {
+        session,
+      });
+      if (!professional) {
+        throw new ApiError(
+          StatusCodes.BAD_REQUEST,
+          'Failed to create professional profile',
+        );
+      }
+      const updatedUser = await User.findByIdAndUpdate(
+        { _id: createdUser._id },
+        { $set: { roleRef: professional._id } },
+        { session, new: true },
+      );
+      if (!updatedUser) {
+        throw new ApiError(StatusCodes.BAD_REQUEST, 'Failed to update user');
+      }
     }
 
     // Generate OTP

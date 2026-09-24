@@ -13,7 +13,6 @@ import { supportRoutes } from '../app/modules/support/support.route';
 import { faqRoutes } from '../app/modules/faq/faq.route';
 import { analyticsRoutes } from '../app/modules/analytics/analytics.route';
 import { mediaUploadRoutes } from '../app/modules/mediaUpload/mediaUpload.route';
-import { customerRoutes } from '../app/modules/customer/customer.route';
 const router = express.Router();
 
 const apiRoutes: { path: string; route: any }[] = [
@@ -32,10 +31,6 @@ const apiRoutes: { path: string; route: any }[] = [
   {
     path: '/auth',
     route: AuthRoutes,
-  },
-  {
-    path: '/customers',
-    route: customerRoutes,
   },
   {
     path: '/media-uploads',

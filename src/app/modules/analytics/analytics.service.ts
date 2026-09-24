@@ -1,5 +1,4 @@
 import { Types } from 'mongoose';
-import { Customer } from '../customer/customer.model';
 import { UserRole } from '../user/user.constant';
 import { User } from '../user/user.model';
 

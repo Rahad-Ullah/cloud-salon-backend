@@ -1,5 +1,5 @@
 {
-  "name": "rizipt-backend",
+  "name": "cloud-salon-backend",
   "version": "3.0.1",
   "description": "",
   "author": {
@@ -54,7 +54,7 @@
     "@elastic/elasticsearch": "8",
     "@google/genai": "^2.17.1",
     "axios": "^1.18.1",
-    "bcrypt": "^5.1.1",
+    "bcrypt": "^6.0.0",
     "bullmq": "^6.0.9",
     "colors": "^1.4.0",
     "cors": "^2.8.5",
@@ -69,7 +69,7 @@
     "mongoose": "^8.4.4",
     "morgan": "^1.10.0",
     "multer": "^1.4.5-lts.1",
-    "nodemailer": "^7.0.10",
+    "nodemailer": "^10.0.10",
     "rate-limit-redis": "^6.0.1",
     "socket.io": "^4.7.5",
     "stripe": "^22.1.1",

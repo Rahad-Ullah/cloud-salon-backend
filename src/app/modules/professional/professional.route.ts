@@ -3,6 +3,6 @@ import { ProfessionalController } from './professional.controller';
 
 const router = express.Router();
 
-router.get('/', ProfessionalController);
+// router.get('/', ProfessionalController);
 
 export const professionalRoutes = router;

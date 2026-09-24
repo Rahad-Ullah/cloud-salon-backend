@@ -1,4 +1,3 @@
-import { ICustomer } from '../app/modules/customer/customer.interface';
 import config from '../config';
 import {
   ICreateAccount,
@@ -25,8 +24,8 @@ const createAccount = (values: ICreateAccount) => {
           </p>
           
           <div style="text-align: center; margin: 32px 0;">
-            <div style="display: inline-block; background-color: #f0f8fc; border: 1px dashed #0094DA; border-radius: 10px; padding: 14px 28px;">
-              <span style="font-family: ui-monospace, 'SFMono-Regular', Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New', monospace; font-size: 32px; font-weight: 700; letter-spacing: 6px; color: #0094DA;">
+            <div style="display: inline-block; background-color: #f0f8fc; border: 1px dashed #D99722; border-radius: 10px; padding: 14px 28px;">
+              <span style="font-family: ui-monospace, 'SFMono-Regular', Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New', monospace; font-size: 32px; font-weight: 700; letter-spacing: 6px; color: #D99722;">
                 ${values.otp}
               </span>
             </div>
@@ -68,8 +67,8 @@ const resetPassword = (values: IResetPassword) => {
           </p>
           
           <div style="text-align: center; margin: 32px 0;">
-            <div style="display: inline-block; background-color: #f0f8fc; border: 1px dashed #0094DA; border-radius: 10px; padding: 14px 28px;">
-              <span style="font-family: ui-monospace, 'SFMono-Regular', Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New', monospace; font-size: 32px; font-weight: 700; letter-spacing: 6px; color: #0094DA;">
+            <div style="display: inline-block; background-color: #f0f8fc; border: 1px dashed #D99722; border-radius: 10px; padding: 14px 28px;">
+              <span style="font-family: ui-monospace, 'SFMono-Regular', Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New', monospace; font-size: 32px; font-weight: 700; letter-spacing: 6px; color: #D99722;">
                 ${values.otp}
               </span>
             </div>

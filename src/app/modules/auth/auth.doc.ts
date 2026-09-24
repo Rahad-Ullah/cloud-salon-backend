@@ -50,7 +50,7 @@ export function registerAuthDocs() {
     method: 'post',
     path: '/auth/refresh-token',
     summary: 'User refresh token',
-    isAuth: true,
+    isAuth: false,
     body: AuthValidation.refreshTokenZodSchema.shape.body,
   });
 }

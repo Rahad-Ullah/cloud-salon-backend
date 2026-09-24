@@ -37,16 +37,24 @@ app.use(express.static('uploads'));
 app.use('/api/v1', router);
 
 // Generate doc
-const openApiDoc = generateOpenApiDocumentV1();
-
-// Serve the interactive Swagger UI
-app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(openApiDoc));
+const openApiDocV1 = generateOpenApiDocumentV1();
 
 // Route to raw JSON for Postman import
-app.get('/api-docs.json', (_req, res) => {
-  res.setHeader('Content-Type', 'application/json');
-  res.send(openApiDoc);
-});
+app.get('/api-docs/v1.json', (_req, res) => res.json(openApiDocV1));
+
+// Serve the interactive Swagger UI
+app.use(
+  '/api-docs',
+  swaggerUi.serve,
+  swaggerUi.setup(null, {
+    swaggerOptions: {
+      urls: [
+        { url: '/api-docs/v1.json', name: 'v1.0.0 (Latest)' },
+        // new version will be added here
+      ],
+    },
+  }),
+);
 
 //global error handle
 app.use(globalErrorHandler);

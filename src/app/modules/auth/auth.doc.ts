@@ -1,168 +1,56 @@
 import { z } from '../../../docs/zod';
-import { registry } from '../../../docs/openapi';
+import { registerApiRoute } from '../../../docs/openapi-helper';
 import { AuthValidation } from './auth.validation';
 
-// register the OpenAPI Path
 export function registerAuthDocs() {
-  // login
-  registry.registerPath({
+  const registerAuth = (opts: Parameters<typeof registerApiRoute>[0]) => {
+    registerApiRoute({ tags: ['Auth'], ...opts });
+  };
+
+  registerAuth({
     method: 'post',
     path: '/auth/login',
-    tags: ['Auth'],
     summary: 'User login',
-    security: [{ bearerAuth: [] }],
-    request: {
-      body: {
-        content: {
-          'application/json': {
-            schema: AuthValidation.createLoginZodSchema.shape.body,
-          },
-        },
-      },
-    },
-    responses: {
-      200: {
-        description: 'User logged in successfully',
-      },
-      400: {
-        description: 'Validation failed or invalid input',
-      },
-    },
+    body: AuthValidation.createLoginZodSchema.shape.body,
   });
 
-  // forget password
-  registry.registerPath({
+  registerAuth({
     method: 'post',
     path: '/auth/forget-password',
-    tags: ['Auth'],
     summary: 'User forget password',
-    request: {
-      body: {
-        content: {
-          'application/json': {
-            schema: AuthValidation.createForgetPasswordZodSchema.shape.body,
-          },
-        },
-      },
-    },
-    responses: {
-      200: {
-        description: 'User forget password successfully',
-      },
-      400: {
-        description: 'Validation failed or invalid input',
-      },
-    },
+    body: AuthValidation.createForgetPasswordZodSchema.shape.body,
   });
 
-  // verify email
-  registry.registerPath({
+  registerAuth({
     method: 'post',
     path: '/auth/verify-email',
-    tags: ['Auth'],
     summary: 'User verify email',
-    request: {
-      body: {
-        content: {
-          'application/json': {
-            schema: AuthValidation.createVerifyEmailZodSchema.shape.body,
-          },
-        },
-      },
-    },
-    responses: {
-      200: {
-        description: 'User verify email successfully',
-      },
-      400: {
-        description: 'Validation failed or invalid input',
-      },
-    },
+    body: AuthValidation.createVerifyEmailZodSchema.shape.body,
   });
 
-  // reset password
-  registry.registerPath({
+  registerAuth({
     method: 'post',
     path: '/auth/reset-password',
-    tags: ['Auth'],
     summary: 'User reset password',
-    request: {
-      headers: z.object({
-        authorization: z
-          .string({ required_error: 'Reset token is required' })
-          .openapi({
-            description:
-              'Raw cryptographic reset token (e.g., generated hash/hex token)',
-            example: '4a8f9c1b7e2d3a4f5c6b8a9e0f1d2c3b4a5e6f7a',
-          }),
-      }),
-      body: {
-        content: {
-          'application/json': {
-            schema: AuthValidation.createResetPasswordZodSchema.shape.body,
-          },
-        },
-      },
-    },
-    responses: {
-      200: {
-        description: 'User reset password successfully',
-      },
-      400: {
-        description: 'Validation failed or invalid input',
-      },
-    },
+    headers: z.object({
+      authorization: z.string().openapi({ description: 'Raw reset token' }),
+    }),
+    body: AuthValidation.createResetPasswordZodSchema.shape.body,
   });
 
-  // change password
-  registry.registerPath({
+  registerAuth({
     method: 'post',
     path: '/auth/change-password',
-    tags: ['Auth'],
     summary: 'User change password',
-    security: [{ bearerAuth: [] }],
-    request: {
-      body: {
-        content: {
-          'application/json': {
-            schema: AuthValidation.createChangePasswordZodSchema.shape.body,
-          },
-        },
-      },
-    },
-    responses: {
-      200: {
-        description: 'User change password successfully',
-      },
-      400: {
-        description: 'Validation failed or invalid input',
-      },
-    },
+    isAuth: true,
+    body: AuthValidation.createChangePasswordZodSchema.shape.body,
   });
 
-  // refresh token
-  registry.registerPath({
+  registerAuth({
     method: 'post',
     path: '/auth/refresh-token',
-    tags: ['Auth'],
     summary: 'User refresh token',
-    security: [{ bearerAuth: [] }],
-    request: {
-      body: {
-        content: {
-          'application/json': {
-            schema: AuthValidation.refreshTokenZodSchema.shape.body,
-          },
-        },
-      },
-    },
-    responses: {
-      200: {
-        description: 'User refresh token successfully',
-      },
-      400: {
-        description: 'Validation failed or invalid input',
-      },
-    },
+    isAuth: true,
+    body: AuthValidation.refreshTokenZodSchema.shape.body,
   });
 }

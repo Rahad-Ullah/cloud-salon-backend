@@ -13,7 +13,7 @@ registry.registerComponent('securitySchemes', 'bearerAuth', {
   bearerFormat: 'JWT',
 });
 
-export function generateOpenApiDocument() {
+export function generateOpenApiDocumentV1() {
   registerAuthDocs();
 
   const generator = new OpenApiGeneratorV3(registry.definitions);

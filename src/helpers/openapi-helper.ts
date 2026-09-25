@@ -1,4 +1,4 @@
-import { registry } from './openapi';
+import { registry } from '../docs/openapi';
 import { AnyZodObject, ZodType } from 'zod';
 
 interface RegisterRouteOptions {

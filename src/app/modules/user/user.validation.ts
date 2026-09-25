@@ -29,10 +29,10 @@ const updateUserZodSchema = z.object({
     .object({
       firstName: z.string().optional(),
       lastName: z.string().optional(),
-      image: z.string().url().optional(),
+      image: z.union([z.string().url(), z.literal('')]).optional(),
       phone: z
         .object({
-          countryCode: z.string().min(1).max(5).optional(),
+          countryCode: z.string().max(5).optional(),
           number: z.string().optional(),
         })
         .optional(),

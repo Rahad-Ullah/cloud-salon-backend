@@ -56,6 +56,16 @@ app.use(
   }),
 );
 
+//live response
+app.get('/', (req: Request, res: Response) => {
+  const date = new Date(Date.now());
+  res.send(
+    `<h1 style="text-align:center; color:#173616; font-family:Verdana;">Beep-beep! The ${config.server_name} server is alive and flying 🚀</h1>
+    <p style="text-align:center; color:#173616; font-family:Verdana;">${date}</p>
+    `,
+  );
+});
+
 //global error handle
 app.use(globalErrorHandler);
 

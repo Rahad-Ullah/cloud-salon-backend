@@ -1,5 +1,5 @@
 import { z } from '../../../docs/zod';
-import { registerApiRoute } from '../../../docs/openapi-helper';
+import { registerApiRoute } from '../../../helpers/openapi-helper';
 import { AuthValidation } from './auth.validation';
 
 export function registerAuthDocs() {

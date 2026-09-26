@@ -10,6 +10,7 @@ import { registerDisclaimerDocs } from '../app/modules/disclaimer/disclaimer.doc
 import { registerFaqDocs } from '../app/modules/faq/faq.doc';
 import { registerNotificationDocs } from '../app/modules/notification/notification.doc';
 import { registerSupportDocs } from '../app/modules/support/support.doc';
+import { registerMediaUploadDocs } from '../app/modules/mediaUpload/mediaUpload.doc';
 
 export const registry = new OpenAPIRegistry();
 
@@ -24,6 +25,7 @@ export function generateOpenApiDocumentV1() {
   registerAuthDocs();
   registerUserDocs();
   registerProfessionalDocs();
+  registerMediaUploadDocs();
   registerDisclaimerDocs();
   registerFaqDocs();
   registerNotificationDocs();

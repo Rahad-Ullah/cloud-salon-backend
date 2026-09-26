@@ -10,6 +10,11 @@ const chatSchema = new Schema<IChat, ChatModel>(
         required: true,
       },
     ],
+    lastMessage: {
+      type: Schema.Types.ObjectId,
+      ref: 'Message',
+      default: null,
+    },
     isDeleted: {
       type: Boolean,
       default: false,

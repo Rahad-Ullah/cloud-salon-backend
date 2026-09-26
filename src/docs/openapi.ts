@@ -11,6 +11,7 @@ import { registerFaqDocs } from '../app/modules/faq/faq.doc';
 import { registerNotificationDocs } from '../app/modules/notification/notification.doc';
 import { registerSupportDocs } from '../app/modules/support/support.doc';
 import { registerMediaUploadDocs } from '../app/modules/mediaUpload/mediaUpload.doc';
+import { registerChatDocs } from '../app/modules/chat/chat.doc';
 
 export const registry = new OpenAPIRegistry();
 
@@ -26,6 +27,7 @@ export function generateOpenApiDocumentV1() {
   registerUserDocs();
   registerProfessionalDocs();
   registerMediaUploadDocs();
+  registerChatDocs();
   registerDisclaimerDocs();
   registerFaqDocs();
   registerNotificationDocs();

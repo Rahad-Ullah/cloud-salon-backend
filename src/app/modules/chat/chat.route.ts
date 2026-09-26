@@ -11,7 +11,7 @@ router.post(
   '/create',
   auth(),
   validateRequest(ChatValidations.createChatValidation),
-  ChatController.createChat
+  ChatController.createChat,
 );
 
 // delete chat
@@ -19,7 +19,7 @@ router.delete(
   '/:id',
   auth(),
   validateRequest(ChatValidations.deleteChatValidation),
-  ChatController.deleteChat
+  ChatController.deleteChat,
 );
 
 // get single chat
@@ -27,10 +27,15 @@ router.get(
   '/single/:id',
   auth(),
   validateRequest(ChatValidations.getSingleChatValidation),
-  ChatController.getSingleChat
+  ChatController.getSingleChat,
 );
 
 // get my chats
-router.get('/me', auth(), ChatController.getMyChats);
+router.get(
+  '/me',
+  auth(),
+  validateRequest(ChatValidations.getMyChatsValidation),
+  ChatController.getMyChats,
+);
 
 export const ChatRoutes = router;

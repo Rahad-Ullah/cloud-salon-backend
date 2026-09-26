@@ -34,9 +34,9 @@ export const getSingleChatValidation = z.object({
 export const getMyChatsValidation = z.object({
   query: z
     .object({
+      searchTerm: z.string().optional(),
       page: z.number().optional(),
       limit: z.number().optional(),
-      search: z.string().optional(),
     })
     .strict(),
 });

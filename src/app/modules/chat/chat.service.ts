@@ -4,7 +4,7 @@ import { Chat } from './chat.model';
 import ApiError from '../../../errors/ApiError';
 import { StatusCodes } from 'http-status-codes';
 import { Message } from '../message/message.model';
-import { IMessage } from '../message/message.interface';
+import { toObjectId } from '../../../utils/toObjectId';
 
 // ---------------- create chat ----------------
 const createChatIntoDB = async (user: JwtPayload, payload: IChat) => {
@@ -17,7 +17,7 @@ const createChatIntoDB = async (user: JwtPayload, payload: IChat) => {
   // create chat if it does not exist
   const isExist = await Chat.findOne({
     participants: { $all: participants },
-    isDeleted: false
+    isDeleted: false,
   }).lean();
   if (isExist) {
     return isExist;
@@ -37,7 +37,7 @@ const deleteChatFromDB = async (chatId: string) => {
   const result = await Chat.findByIdAndUpdate(
     chatId,
     { isDeleted: true },
-    { new: true }
+    { new: true },
   );
   return result;
 };
@@ -46,24 +46,24 @@ const deleteChatFromDB = async (chatId: string) => {
 const getSingleChatFromDB = async (chatId: string, userId: string) => {
   const result = await Chat.findById(chatId).populate(
     'participants',
-    'name image isOnline'
+    'firstName lastName image isOnline',
   );
 
   // check if the user is a participant
   if (
     !result?.participants?.find(
-      (participant: any) => participant?._id.toString() === userId
+      (participant: any) => participant?._id.toString() === userId,
     )
   ) {
     throw new ApiError(
       StatusCodes.BAD_REQUEST,
-      'You are not a participant of this chat!'
+      'You are not a participant of this chat!',
     );
   }
 
   if (result) {
     const anotherParticipant = result?.participants?.find(
-      (participant: any) => participant?._id.toString() !== userId
+      (participant: any) => participant?._id.toString() !== userId,
     );
     return { ...result?.toObject(), anotherParticipant };
   }
@@ -73,55 +73,76 @@ const getSingleChatFromDB = async (chatId: string, userId: string) => {
 // ---------------- get my chats / get by id ----------------
 const getMyChatsFromDB = async (
   user: JwtPayload,
-  query: Record<string, any>
+  query: Record<string, any>,
 ) => {
-  const chats = await Chat.find({ participants: { $in: [user.id] }, isDeleted: false })
+  const currentUserId = toObjectId(user.id);
+
+  // 1. Build participant filter for search
+  const participantFilter: Record<string, any> = {
+    _id: { $ne: currentUserId },
+  };
+
+  if (query?.searchTerm) {
+    const term = String(query.searchTerm);
+    participantFilter.$or = [
+      { firstName: { $regex: term, $options: 'i' } },
+      { lastName: { $regex: term, $options: 'i' } },
+    ];
+  }
+
+  // 2. Fetch chats, populate the other participant and the embedded lastMessage
+  const chats = await Chat.find({
+    participants: currentUserId,
+    isDeleted: false,
+  })
     .populate({
       path: 'participants',
-      select: 'name image isOnline isDeleted',
-      match: {
-        // isDeleted: false,
-        _id: { $ne: user.id }, // Exclude the current user from the populated participants
-        ...(query?.searchTerm && {
-          name: { $regex: query?.searchTerm, $options: 'i' },
-        }),
-      }, // Apply $regex only if search is valid },
+      select: 'firstName lastName image isOnline isDeleted',
+      match: participantFilter,
     })
-    .select('participants updatedAt')
-    .sort('-updatedAt');
+    .populate({
+      path: 'lastMessage',
+      select: 'sender type content isDeleted createdAt',
+    })
+    .select('participants lastMessage updatedAt')
+    .sort({ updatedAt: -1 })
+    .lean();
 
-  // Filter out chats where no participants match the search (empty participants)
-  const filteredChats = chats?.filter(
-    (chat: any) => chat?.participants?.length > 0
+  // 3. Keep only chats where participants matched the search
+  const filteredChats = chats.filter(
+    (chat: any) => chat.participants && chat.participants.length > 0,
   );
 
-  //Use Promise.all to get the last message for each chat
-  const chatList = await Promise.all(
-    filteredChats?.map(async (chat: any) => {
-      const data = chat?.toObject();
+  if (!filteredChats.length) return [];
 
-      const lastMessage: IMessage | null = await Message.findOne({
-        chat: chat?._id,
-      })
-        .sort({ createdAt: -1 })
-        .select('sender type content isDeleted createdAt');
+  // 4. Batch count unread messages in a single aggregation query
+  const chatIds = filteredChats.map(c => c._id);
 
-      // find unread messages count
-      const unreadCount = await Message.countDocuments({
-        chat: chat?._id,
-        seenBy: { $nin: [user.id] },
-      });
+  const unreadCounts = await Message.aggregate([
+    {
+      $match: {
+        chat: { $in: chatIds },
+        seenBy: { $nin: [currentUserId] },
+      },
+    },
+    {
+      $group: {
+        _id: '$chat',
+        count: { $sum: 1 },
+      },
+    },
+  ]);
 
-      return {
-        ...data,
-        participants: data.participants,
-        unreadCount: unreadCount || 0,
-        lastMessage: lastMessage || null,
-      };
-    })
+  const unreadMap = new Map(
+    unreadCounts.map(item => [item._id.toString(), item.count]),
   );
 
-  return chatList;
+  // 5. Map the unread count in memory (Zero extra DB calls)
+  return filteredChats.map((chat: any) => ({
+    ...chat,
+    lastMessage: chat.lastMessage || null,
+    unreadCount: unreadMap.get(chat._id.toString()) || 0,
+  }));
 };
 
 export const ChatServices = {

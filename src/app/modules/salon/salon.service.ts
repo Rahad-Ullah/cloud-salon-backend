@@ -4,6 +4,10 @@ import { ISalon } from './salon.interface';
 import { Salon } from './salon.model';
 import { User } from '../user/user.model';
 import mongoose from 'mongoose';
+import { MediaUploadServices } from '../mediaUpload/mediaUpload.service';
+import deleteS3File from '../../../shared/deleteS3File';
+import { errorLogger } from '../../../shared/logger';
+import { JwtPayload } from 'jsonwebtoken';
 
 // --------------- create salon ---------------
 const createSalon = async (payload: ISalon): Promise<ISalon> => {
@@ -57,6 +61,60 @@ const createSalon = async (payload: ISalon): Promise<ISalon> => {
   }
 };
 
+// ----------------- update salon -----------------
+const updateSalon = async (
+  id: string,
+  payload: Partial<ISalon>,
+  user: JwtPayload,
+): Promise<any> => {
+  // check if the salon exists
+  const existingSalon = await Salon.findById(id).select('logo photos');
+  if (!existingSalon) {
+    throw new ApiError(StatusCodes.NOT_FOUND, 'Salon not found');
+  }
+
+  // check if the user is the owner of the salon
+  if (existingSalon.createdBy.toString() !== user.id) {
+    throw new ApiError(
+      StatusCodes.FORBIDDEN,
+      'You are not allowed to update this salon',
+    );
+  }
+
+  const result = await Salon.findByIdAndUpdate(id, payload, {
+    new: true,
+    runValidators: true,
+  });
+
+  // mark the new files as used and unlink the old files
+  if (payload.logo) {
+    await MediaUploadServices.markMediaAsUsed(payload.logo);
+
+    if (existingSalon.logo && payload.logo !== existingSalon.logo) {
+      deleteS3File(existingSalon.logo).catch(err => errorLogger.error(err));
+    }
+  }
+  if (payload.photos && payload.photos.length > 0) {
+    const existingPhotos = existingSalon.photos || [];
+    const newPhotos = payload.photos.filter(
+      photo => !existingPhotos.includes(photo),
+    );
+    const removedPhotos = existingPhotos.filter(
+      photo => !payload.photos!.includes(photo),
+    );
+    await MediaUploadServices.markMediaAsUsed(newPhotos);
+
+    if (removedPhotos.length > 0) {
+      removedPhotos.forEach(async photo => {
+        deleteS3File(photo).catch(err => errorLogger.error(err));
+      });
+    }
+  }
+
+  return result;
+};
+
 export const SalonServices = {
   createSalon,
+  updateSalon,
 };

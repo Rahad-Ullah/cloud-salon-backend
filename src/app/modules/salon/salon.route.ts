@@ -15,4 +15,12 @@ router.post(
   SalonController.createSalon,
 );
 
+// update salon
+router.patch(
+  '/:id',
+  auth(UserRole.Professional),
+  validateRequest(SalonValidations.updateSalonValidation),
+  SalonController.updateSalon,
+);
+
 export const salonRoutes = router;

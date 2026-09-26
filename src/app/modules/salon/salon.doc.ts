@@ -15,4 +15,15 @@ export function registerSalonDocs() {
     body: SalonValidations.createSalonValidation.shape.body,
     isAuth: true,
   });
+
+  // update salon
+  registerSalon({
+    method: 'patch',
+    path: '/salon/:id',
+    summary: 'Update salon',
+    roles: ['Professional'],
+    params: SalonValidations.updateSalonValidation.shape.params,
+    body: SalonValidations.updateSalonValidation.shape.body,
+    isAuth: true,
+  });
 }

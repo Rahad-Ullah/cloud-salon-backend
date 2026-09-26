@@ -19,6 +19,23 @@ const createSalon = catchAsync(async (req: Request, res: Response) => {
   });
 });
 
+// update salon
+const updateSalon = catchAsync(async (req: Request, res: Response) => {
+  const result = await SalonServices.updateSalon(
+    req.params.id,
+    req.body,
+    req.user,
+  );
+
+  sendResponse(res, {
+    success: true,
+    statusCode: StatusCodes.OK,
+    message: 'Salon updated successfully',
+    data: result,
+  });
+});
+
 export const SalonController = {
   createSalon,
+  updateSalon,
 };

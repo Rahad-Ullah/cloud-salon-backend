@@ -8,6 +8,7 @@ import { MediaUploadServices } from '../mediaUpload/mediaUpload.service';
 import deleteS3File from '../../../shared/deleteS3File';
 import { errorLogger } from '../../../shared/logger';
 import { JwtPayload } from 'jsonwebtoken';
+import QueryBuilder from '../../builder/QueryBuilder';
 
 // --------------- create salon ---------------
 const createSalon = async (payload: ISalon): Promise<ISalon> => {
@@ -140,9 +141,32 @@ const getMySalon = async (userId: string) => {
   return result;
 };
 
+// ---------------- get all salons ---------------
+const getAllSalons = async (query: Record<string, unknown>) => {
+  const salonQuery = new QueryBuilder(Salon.find(), query)
+    .search(['name businessType'])
+    .filter()
+    .sort()
+    .paginate()
+    .fields();
+
+  const [data, pagination] = await Promise.all([
+    salonQuery.modelQuery
+      .populate(
+        'createdBy',
+        'firstName lastName email role phone image isSalonOwner',
+      )
+      .lean(),
+    salonQuery.getPaginationInfo(),
+  ]);
+
+  return { data, pagination };
+};
+
 export const SalonServices = {
   createSalon,
   updateSalon,
   getSingleSalon,
   getMySalon,
+  getAllSalons,
 };

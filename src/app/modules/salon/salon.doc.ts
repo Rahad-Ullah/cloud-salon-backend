@@ -9,7 +9,7 @@ export function registerSalonDocs() {
   // create salon
   registerSalon({
     method: 'post',
-    path: '/salon/create',
+    path: '/salons/create',
     summary: 'Create salon',
     roles: ['Professional'],
     body: SalonValidations.createSalonValidation.shape.body,
@@ -19,7 +19,7 @@ export function registerSalonDocs() {
   // update salon
   registerSalon({
     method: 'patch',
-    path: '/salon/:id',
+    path: '/salons/:id',
     summary: 'Update salon',
     roles: ['Professional'],
     params: SalonValidations.updateSalonValidation.shape.params,
@@ -30,7 +30,7 @@ export function registerSalonDocs() {
   // get my salon
   registerSalon({
     method: 'get',
-    path: '/salon/my-salon',
+    path: '/salons/my-salon',
     summary: 'Get my salon',
     roles: ['Professional'],
     isAuth: true,
@@ -39,9 +39,17 @@ export function registerSalonDocs() {
   // get single salon
   registerSalon({
     method: 'get',
-    path: '/salon/:id',
+    path: '/salons/:id',
     summary: 'Get single salon',
     params: SalonValidations.getSalonByIdValidation.shape.params,
-    isAuth: true,
+    isAuth: false,
+  });
+
+  // get all salons
+  registerSalon({
+    method: 'get',
+    path: '/salons',
+    summary: 'Get all salons',
+    isAuth: false,
   });
 }

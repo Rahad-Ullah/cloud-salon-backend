@@ -59,9 +59,22 @@ const getMySalon = catchAsync(async (req: Request, res: Response) => {
   });
 });
 
+// get all salons
+const getAllSalons = catchAsync(async (req: Request, res: Response) => {
+  const result = await SalonServices.getAllSalons(req.query);
+
+  sendResponse(res, {
+    success: true,
+    statusCode: StatusCodes.OK,
+    message: 'All salons fetched successfully',
+    data: result,
+  });
+});
+
 export const SalonController = {
   createSalon,
   updateSalon,
   getSingleSalon,
   getMySalon,
+  getAllSalons,
 };

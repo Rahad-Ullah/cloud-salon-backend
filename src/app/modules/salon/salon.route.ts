@@ -37,4 +37,11 @@ router.get(
   SalonController.getSingleSalon,
 );
 
+// get all salons
+router.get(
+  '/',
+  validateRequest(SalonValidations.getAllSalonsValidation),
+  SalonController.getAllSalons,
+);
+
 export const salonRoutes = router;

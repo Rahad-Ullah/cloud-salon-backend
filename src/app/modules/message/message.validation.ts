@@ -8,10 +8,7 @@ const createMessageSchema = z.object({
     .object({
       chat: objectId('Invalid chat ID'),
       type: z.nativeEnum(MessageType),
-      text: z.string().nonempty('Message content is required').optional(),
-      image: z.any().optional(),
-      media: z.any().optional(),
-      doc: z.any().optional(),
+      content: z.string().nonempty('Message content is required'),
     })
     .strict(),
 });
@@ -20,9 +17,12 @@ const createMessageSchema = z.object({
 const getChatMessagesSchema = z.object({
   params: z
     .object({
-      chatId: objectId('Invalid chat ID'),
+      id: objectId('Invalid chat ID'),
     })
     .strict(),
 });
 
-export const MessageValidations = { createMessageSchema, getChatMessagesSchema };
+export const MessageValidations = {
+  createMessageSchema,
+  getChatMessagesSchema,
+};

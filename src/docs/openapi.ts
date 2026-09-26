@@ -12,6 +12,7 @@ import { registerNotificationDocs } from '../app/modules/notification/notificati
 import { registerSupportDocs } from '../app/modules/support/support.doc';
 import { registerMediaUploadDocs } from '../app/modules/mediaUpload/mediaUpload.doc';
 import { registerChatDocs } from '../app/modules/chat/chat.doc';
+import { registerMessageDocs } from '../app/modules/message/message.doc';
 
 export const registry = new OpenAPIRegistry();
 
@@ -28,6 +29,7 @@ export function generateOpenApiDocumentV1() {
   registerProfessionalDocs();
   registerMediaUploadDocs();
   registerChatDocs();
+  registerMessageDocs();
   registerDisclaimerDocs();
   registerFaqDocs();
   registerNotificationDocs();

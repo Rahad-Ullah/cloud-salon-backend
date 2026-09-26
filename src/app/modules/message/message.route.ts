@@ -18,7 +18,7 @@ router.post(
 
 // get messages by chat id
 router.get(
-  '/chat/:chatId',
+  '/chat/:id',
   auth(),
   validateRequest(MessageValidations.getChatMessagesSchema),
   MessageController.getChatMessages

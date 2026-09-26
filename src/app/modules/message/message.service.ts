@@ -27,7 +27,7 @@ export const createMessage = async (payload: IMessage): Promise<IMessage> => {
   payload.seenBy = [payload.sender];
 
   const result = await Message.create(payload);
-  const populatedResult = await result.populate('sender', 'name image isDeleted');
+  const populatedResult = await result.populate('sender', 'firstName lastName image isDeleted');
 
   // emit socket event for new message
   //@ts-ignore
@@ -71,7 +71,7 @@ export const getChatMessages = async (
   // get messages
   const MessageQuery = new QueryBuilder(
     Message.find({ chat: chatId })
-      .populate('sender', 'name image isDeleted')
+      .populate('sender', 'firstName lastName image isDeleted')
       .sort({ createdAt: -1 }),
     query
   )

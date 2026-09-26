@@ -6,6 +6,7 @@ import { registerAuthDocs } from '../app/modules/auth/auth.doc';
 import { registerUserDocs } from '../app/modules/user/user.doc';
 import config from '../config';
 import { registerProfessionalDocs } from '../app/modules/professional/professional.doc';
+import { registerDisclaimerDocs } from '../app/modules/disclaimer/disclaimer.doc';
 
 export const registry = new OpenAPIRegistry();
 
@@ -20,6 +21,7 @@ export function generateOpenApiDocumentV1() {
   registerAuthDocs();
   registerUserDocs();
   registerProfessionalDocs();
+  registerDisclaimerDocs();
 
   const generator = new OpenApiGeneratorV3(registry.definitions);
 

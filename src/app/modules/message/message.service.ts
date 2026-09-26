@@ -67,6 +67,21 @@ export const updateMessage = async (
   return result;
 };
 
+// ----------------- delete message -------------------
+export const deleteMessage = async (id: string, user: JwtPayload) => {
+  // check if the message exists
+  const existingMessage = await Message.findById(id).select('sender');
+  if (!existingMessage)
+    throw new ApiError(StatusCodes.NOT_FOUND, 'Message not found');
+
+  // check if the user is the sender of the message
+  if (existingMessage.sender.toString() !== user?.id)
+    throw new ApiError(StatusCodes.UNAUTHORIZED, 'You are not authorized');
+
+  const result = await Message.findByIdAndUpdate(id, { isDeleted: true });
+  return result;
+};
+
 // ----------------- get messages by chat id -------------------
 export const getChatMessages = async (
   chatId: string,
@@ -114,4 +129,9 @@ export const getChatMessages = async (
   return { messages: messagesWithStatus, pagination };
 };
 
-export const MessageServices = { createMessage, updateMessage, getChatMessages };
+export const MessageServices = {
+  createMessage,
+  updateMessage,
+  deleteMessage,
+  getChatMessages,
+};

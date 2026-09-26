@@ -25,6 +25,15 @@ export function registerMessageDocs() {
     isAuth: true,
   });
 
+  // delete message
+  registerMessage({
+    method: 'delete',
+    path: '/messages/:id',
+    summary: 'Delete message',
+    params: MessageValidations.deleteMessageSchema.shape.params,
+    isAuth: true,
+  });
+
   // get messages by chat id
   registerMessage({
     method: 'get',

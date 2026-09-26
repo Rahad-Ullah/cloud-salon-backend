@@ -34,6 +34,18 @@ const updateMessage = catchAsync(async (req: Request, res: Response) => {
   });
 });
 
+// ----------------- delete message -------------------
+const deleteMessage = catchAsync(async (req: Request, res: Response) => {
+  const result = await MessageServices.deleteMessage(req.params.id, req.user);
+
+  sendResponse(res, {
+    success: true,
+    statusCode: StatusCodes.OK,
+    message: 'Message deleted successfully',
+    data: result,
+  });
+});
+
 // ----------------- get messages by chat id -------------------
 const getChatMessages = catchAsync(async (req: Request, res: Response) => {
   const chatId = req.params.id;
@@ -50,4 +62,9 @@ const getChatMessages = catchAsync(async (req: Request, res: Response) => {
   });
 });
 
-export const MessageController = { createMessage, updateMessage, getChatMessages };
+export const MessageController = {
+  createMessage,
+  updateMessage,
+  deleteMessage,
+  getChatMessages,
+};

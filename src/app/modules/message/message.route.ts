@@ -22,6 +22,14 @@ router.patch(
   MessageController.updateMessage,
 );
 
+// delete message
+router.delete(
+  '/:id',
+  auth(),
+  validateRequest(MessageValidations.deleteMessageSchema),
+  MessageController.deleteMessage,
+);
+
 // get messages by chat id
 router.get(
   '/chat/:id',

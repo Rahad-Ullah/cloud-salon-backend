@@ -27,6 +27,15 @@ const updateMessageSchema = z.object({
     .strict(),
 });
 
+// delete message validation schema
+const deleteMessageSchema = z.object({
+  params: z
+    .object({
+      id: objectId('Invalid message ID'),
+    })
+    .strict(),
+});
+
 // get message by chat id
 const getChatMessagesSchema = z.object({
   params: z
@@ -39,5 +48,6 @@ const getChatMessagesSchema = z.object({
 export const MessageValidations = {
   createMessageSchema,
   updateMessageSchema,
+  deleteMessageSchema,
   getChatMessagesSchema,
 };

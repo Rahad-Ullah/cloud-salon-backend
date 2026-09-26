@@ -5,6 +5,7 @@ import {
 import { registerAuthDocs } from '../app/modules/auth/auth.doc';
 import { registerUserDocs } from '../app/modules/user/user.doc';
 import config from '../config';
+import { registerProfessionalDocs } from '../app/modules/professional/professional.doc';
 
 export const registry = new OpenAPIRegistry();
 
@@ -18,6 +19,7 @@ registry.registerComponent('securitySchemes', 'bearerAuth', {
 export function generateOpenApiDocumentV1() {
   registerAuthDocs();
   registerUserDocs();
+  registerProfessionalDocs();
 
   const generator = new OpenApiGeneratorV3(registry.definitions);
 

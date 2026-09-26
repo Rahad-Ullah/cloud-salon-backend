@@ -4,8 +4,13 @@ import { autoIncrementPlugin } from '../../../DB/autoIncrementPlugin';
 
 const professionalSchema = new Schema<IProfessional, ProfessionalModel>(
   {
-    uid: { type: String, required: true },
-    user: { type: Schema.Types.ObjectId, required: true, ref: 'User' },
+    uid: { type: String, unique: true, sparse: true, trim: true },
+    user: {
+      type: Schema.Types.ObjectId,
+      ref: 'User',
+      unique: true,
+      required: true,
+    },
     title: { type: String, default: '' },
     quote: { type: String, default: '' },
     bio: { type: String, default: '' },
@@ -19,8 +24,6 @@ const professionalSchema = new Schema<IProfessional, ProfessionalModel>(
   },
   { timestamps: true },
 );
-
-professionalSchema.index({ user: 1 });
 
 // auto increment uid
 professionalSchema.plugin(autoIncrementPlugin, {

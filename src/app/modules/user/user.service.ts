@@ -37,9 +37,12 @@ const createUserToDB = async (payload: Partial<IUser>) => {
 
     // Create professional profile
     if (createdUser.role === UserRole.Professional) {
-      const [professional] = await Professional.create([{ user: createdUser._id }], {
-        session,
-      });
+      const [professional] = await Professional.create(
+        [{ user: createdUser._id }],
+        {
+          session,
+        },
+      );
       if (!professional) {
         throw new ApiError(
           StatusCodes.BAD_REQUEST,

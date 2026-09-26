@@ -7,14 +7,19 @@ import { NotificationValidation } from './notification.validation';
 const router = express.Router();
 
 // get my notifications
-router.get('/me', auth(), NotificationController.getMyNotifications);
+router.get(
+  '/me',
+  auth(),
+  validateRequest(NotificationValidation.getMyNotificationsSchema),
+  NotificationController.getMyNotifications,
+);
 
 // read single notification by id
 router.patch(
-    '/read/:id',
-    auth(),
-    validateRequest(NotificationValidation.readNotificationSchema),
-    NotificationController.readNotification
+  '/:id/read',
+  auth(),
+  validateRequest(NotificationValidation.readNotificationSchema),
+  NotificationController.readNotification,
 );
 
 // read all notifications

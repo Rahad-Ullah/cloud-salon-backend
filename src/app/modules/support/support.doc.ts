@@ -11,6 +11,7 @@ export function registerSupportDocs() {
     method: 'post',
     path: '/supports/create',
     summary: 'Create support',
+    roles: ['Customer', 'Professional'],
     body: SupportValidations.createSupportSchema.shape.body,
     isAuth: true,
   });
@@ -20,6 +21,7 @@ export function registerSupportDocs() {
     method: 'patch',
     path: '/supports/:id',
     summary: 'Update support status',
+    roles: ['Admin', 'SuperAdmin'],
     params: SupportValidations.updateSupportSchema.shape.params,
     body: SupportValidations.updateSupportSchema.shape.body,
     isAuth: true,
@@ -30,7 +32,9 @@ export function registerSupportDocs() {
     method: 'get',
     path: '/supports/single/:id',
     summary: 'Get single support',
+    roles: ['Admin', 'SuperAdmin'],
     params: SupportValidations.getSingleSupportSchema.shape.params,
+    isAuth: true,
   });
 
   // get my supports
@@ -38,6 +42,8 @@ export function registerSupportDocs() {
     method: 'get',
     path: '/supports/me',
     summary: 'Get my supports',
+    roles: ['Customer', 'Professional'],
+    isAuth: true,
   });
 
   // get all supports
@@ -45,6 +51,8 @@ export function registerSupportDocs() {
     method: 'get',
     path: '/supports',
     summary: 'Get all supports',
+    roles: ['Admin', 'SuperAdmin'],
     query: SupportValidations.getAllSupportSchema.shape.query,
+    isAuth: true,
   });
 }

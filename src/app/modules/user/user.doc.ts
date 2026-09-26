@@ -12,6 +12,7 @@ export function registerUserDocs() {
     path: '/users/register',
     summary: 'User registration',
     body: UserValidation.createUserZodSchema.shape.body,
+    isAuth: false,
   });
 
   // update profile
@@ -28,6 +29,7 @@ export function registerUserDocs() {
     method: 'patch',
     path: '/users/:id/status',
     summary: 'Update user status',
+    roles: ['Admin', 'SuperAdmin'],
     params: UserValidation.updateStatusZodSchema.shape.params,
     body: UserValidation.updateStatusZodSchema.shape.body,
     isAuth: true,
@@ -38,6 +40,7 @@ export function registerUserDocs() {
     method: 'delete',
     path: '/users/:id',
     summary: 'Delete user',
+    roles: ['Admin', 'SuperAdmin'],
     params: UserValidation.deleteUserZodSchema.shape.params,
     isAuth: true,
   });
@@ -64,6 +67,7 @@ export function registerUserDocs() {
     method: 'get',
     path: '/users',
     summary: 'Get all users',
+    roles: ['Admin', 'SuperAdmin'],
     query: UserValidation.getAllUsersZodSchema.shape.query,
     isAuth: true,
   });

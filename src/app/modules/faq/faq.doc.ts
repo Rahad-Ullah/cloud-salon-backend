@@ -11,6 +11,7 @@ export function registerFaqDocs() {
     method: 'post',
     path: '/faq/create',
     summary: 'Create faq',
+    roles: ['Admin', 'SuperAdmin'],
     body: FaqValidations.createFaqValidation.shape.body,
     isAuth: true,
   });
@@ -20,6 +21,7 @@ export function registerFaqDocs() {
     method: 'patch',
     path: '/faq/:id',
     summary: 'Update faq',
+    roles: ['Admin', 'SuperAdmin'],
     params: FaqValidations.updateFaqValidation.shape.params,
     body: FaqValidations.updateFaqValidation.shape.body,
     isAuth: true,
@@ -30,6 +32,7 @@ export function registerFaqDocs() {
     method: 'delete',
     path: '/faq/:id',
     summary: 'Delete faq',
+    roles: ['Admin', 'SuperAdmin'],
     params: FaqValidations.deleteFaqValidation.shape.params,
     isAuth: true,
   });

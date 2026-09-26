@@ -11,6 +11,7 @@ export function registerDisclaimerDocs() {
     method: 'post',
     path: '/disclaimers',
     summary: 'Update disclaimer',
+    roles: ['Admin', 'SuperAdmin'],
     body: DisclaimerValidations.createUpdateDisclaimerSchema.shape.body,
     isAuth: true,
   });
@@ -20,6 +21,7 @@ export function registerDisclaimerDocs() {
     method: 'get',
     path: '/disclaimers/:type',
     summary: 'Get disclaimer by type',
+    roles: ['Admin', 'SuperAdmin'],
     params: DisclaimerValidations.getDisclaimerSchema.shape.params,
   });
 }

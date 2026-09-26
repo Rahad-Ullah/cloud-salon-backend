@@ -13,6 +13,7 @@ export function registerProfessionalDocs() {
     method: 'patch',
     path: '/professionals/me',
     summary: 'Update profile',
+    roles: ['Professional'],
     body: ProfessionalValidations.updateProfessionalValidation.shape.body,
     isAuth: true,
   });

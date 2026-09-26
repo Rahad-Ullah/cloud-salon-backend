@@ -27,6 +27,7 @@ type Templates = {
   route: string;
   validation: string;
   constants: string;
+  doc: string;
 };
 
 function createModule(name: string): void {
@@ -35,11 +36,17 @@ function createModule(name: string): void {
   const constantName = toConstantCase(name); // JOB_SEEKER
   const folderName = camelName; // jobSeeker
 
-  const folderPath = path.join(process.cwd(), 'src', 'app', 'modules', folderName);
+  const folderPath = path.join(
+    process.cwd(),
+    'src',
+    'app',
+    'modules',
+    folderName,
+  );
 
   // Create folder
   if (!fs.existsSync(folderPath)) {
-    fs.mkdirSync(folderPath);
+    fs.mkdirSync(folderPath, { recursive: true });
     console.log(`Created folder: ${folderName}`);
   } else {
     console.log(`Folder ${folderName} already exists.`);
@@ -91,11 +98,50 @@ export const ${camelName}Routes = router;`,
 
     validation: `import { z } from 'zod';
 
+const create${pascalName}Validation = z.object({
+  body: z.object({}),
+});
+
+const update${pascalName}Validation = z.object({
+  params: z.object({ id: z.string() }),
+  body: z.object({}),
+});
+
+const delete${pascalName}Validation = z.object({
+  params: z.object({ id: z.string() }),
+});
+
+const get${pascalName}ByIdValidation = z.object({
+  params: z.object({ id: z.string() }),
+});
+
 export const ${pascalName}Validations = {
-  // Zod validation schemas
+  create${pascalName}Validation,
+  update${pascalName}Validation,
+  delete${pascalName}Validation,
+  get${pascalName}ByIdValidation,
 };`,
 
     constants: `export const ${constantName}_CONSTANT = 'someValue';`,
+
+    doc: `import { registerApiRoute } from '../../../helpers/openapi-helper';
+import { ${pascalName}Validations } from './${folderName}.validation';
+
+export function register${pascalName}Docs() {
+  const register${pascalName} = (opts: Parameters<typeof registerApiRoute>[0]) => {
+    registerApiRoute({ tags: ['${pascalName}'], ...opts });
+  };
+
+  // create ${camelName}
+  // register${pascalName}({
+  //   method: 'post',
+  //   path: '/${camelName}/create',
+  //   summary: 'Create ${camelName}',
+  //   roles: ['Admin', 'SuperAdmin'],
+  //   body: ${pascalName}Validations.create${pascalName}Validation.shape.body,
+  //   isAuth: true,
+  // });
+}`,
   };
 
   Object.entries(templates).forEach(([key, content]) => {
@@ -110,7 +156,7 @@ export const ${pascalName}Validations = {
 const moduleName: string | undefined = process.argv[2];
 if (!moduleName) {
   console.log(
-    'Please provide a module name, e.g., node generateModule userProfile'
+    'Please provide a module name, e.g., node generateModule userProfile',
   );
 } else {
   createModule(moduleName);
@@ -118,6 +164,13 @@ if (!moduleName) {
 
 function updateRouterFile(folderName: string, camelName: string): void {
   const routerPath = path.join(__dirname, 'routes', 'index.ts');
+
+  if (!fs.existsSync(routerPath)) {
+    console.warn(
+      `Router file not found at ${routerPath}. Skipping central router update.`,
+    );
+    return;
+  }
 
   const routeImport = `import { ${camelName}Routes } from '../app/modules/${folderName}/${folderName}.route';`;
   const pluralPath = `/${folderName.toLowerCase()}s`;
@@ -129,7 +182,7 @@ function updateRouterFile(folderName: string, camelName: string): void {
     routerFileContent = `${routeImport}\n${routerFileContent}`;
   }
 
-  const apiRoutesRegex = /const apiRoutes\s*=\s*\[((.|\s)*?)\];/m;
+  const apiRoutesRegex = /const apiRoutes\s*=\s*\[((.\vert{}\s)*?)\];/m;
 
   const match = routerFileContent.match(apiRoutesRegex);
 
@@ -143,16 +196,16 @@ function updateRouterFile(folderName: string, camelName: string): void {
 
       routerFileContent = routerFileContent.replace(
         apiRoutesRegex,
-        `const apiRoutes: { path: string; route: any }[] = [\n  ${updatedRoutes}\n]`
+        `const apiRoutes: { path: string; route: any }[] = [\n  ${updatedRoutes}\n]`,
       );
     }
   } else {
     console.error(
-      'Failed to find apiRoutes array. Ensure index.ts has a properly defined apiRoutes array.'
+      'Failed to find apiRoutes array. Ensure index.ts has a properly defined apiRoutes array.',
     );
     return;
   }
 
   fs.writeFileSync(routerPath, routerFileContent, 'utf-8');
-  console.log(`✅ Added route for ${camelName} to central router.`);
+  console.log(`Added route for ${camelName} to central router.`);
 }

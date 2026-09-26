@@ -41,8 +41,19 @@ const getSingleSupportSchema = z.object({
   }).strict()
 })
 
+// get all support tickets
+const getAllSupportSchema = z.object({
+  query: z.object({
+    searchTerm: z.string().optional(),
+    status: z.nativeEnum(SupportStatus).optional(),
+    page: z.string().optional(),
+    limit: z.string().optional(),
+  }).strict()
+})
+
 export const SupportValidations = {
   createSupportSchema,
   updateSupportSchema,
   getSingleSupportSchema,
+  getAllSupportSchema
 };

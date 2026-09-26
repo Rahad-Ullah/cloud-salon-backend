@@ -9,6 +9,7 @@ import { registerProfessionalDocs } from '../app/modules/professional/profession
 import { registerDisclaimerDocs } from '../app/modules/disclaimer/disclaimer.doc';
 import { registerFaqDocs } from '../app/modules/faq/faq.doc';
 import { registerNotificationDocs } from '../app/modules/notification/notification.doc';
+import { registerSupportDocs } from '../app/modules/support/support.doc';
 
 export const registry = new OpenAPIRegistry();
 
@@ -26,6 +27,7 @@ export function generateOpenApiDocumentV1() {
   registerDisclaimerDocs();
   registerFaqDocs();
   registerNotificationDocs();
+  registerSupportDocs();
 
   const generator = new OpenApiGeneratorV3(registry.definitions);
 

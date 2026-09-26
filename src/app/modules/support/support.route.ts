@@ -17,32 +17,38 @@ router.post(
 
 // update support ticket
 router.patch(
-    '/:id',
-    auth(UserRole.Admin, UserRole.SuperAdmin),
-    validateRequest(SupportValidations.updateSupportSchema),
-    SupportController.updateSupport
-)
+  '/:id',
+  auth(UserRole.Admin, UserRole.SuperAdmin),
+  validateRequest(SupportValidations.updateSupportSchema),
+  SupportController.updateSupport,
+);
 
 // get single support ticket
 router.get(
   '/single/:id',
-  auth(UserRole.Customer, UserRole.Professional, UserRole.Admin, UserRole.SuperAdmin),
+  auth(
+    UserRole.Customer,
+    UserRole.Professional,
+    UserRole.Admin,
+    UserRole.SuperAdmin,
+  ),
   validateRequest(SupportValidations.getSingleSupportSchema),
   SupportController.getSingleById,
 );
 
-// get by user id
+// get my support tickets
 router.get(
-  '/my-tickets',
+  '/me',
   auth(UserRole.Customer, UserRole.Professional),
   SupportController.getByUserId,
 );
 
 // get all support tickets
 router.get(
-    '/',
-    auth(UserRole.Admin, UserRole.SuperAdmin),
-    SupportController.getAllSupports
-)
+  '/',
+  auth(UserRole.Admin, UserRole.SuperAdmin),
+  validateRequest(SupportValidations.getAllSupportSchema),
+  SupportController.getAllSupports,
+);
 
 export const supportRoutes = router;

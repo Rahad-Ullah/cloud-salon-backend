@@ -15,6 +15,16 @@ export function registerMessageDocs() {
     isAuth: true,
   });
 
+  // update message
+  registerMessage({
+    method: 'patch',
+    path: '/messages/:id',
+    summary: 'Update message',
+    params: MessageValidations.updateMessageSchema.shape.params,
+    body: MessageValidations.updateMessageSchema.shape.body,
+    isAuth: true,
+  });
+
   // get messages by chat id
   registerMessage({
     method: 'get',

@@ -13,6 +13,20 @@ const createMessageSchema = z.object({
     .strict(),
 });
 
+// update message validation schema
+const updateMessageSchema = z.object({
+  params: z
+    .object({
+      id: objectId('Invalid message ID'),
+    })
+    .strict(),
+  body: z
+    .object({
+      content: z.string().nonempty('Message content is required'),
+    })
+    .strict(),
+});
+
 // get message by chat id
 const getChatMessagesSchema = z.object({
   params: z
@@ -24,5 +38,6 @@ const getChatMessagesSchema = z.object({
 
 export const MessageValidations = {
   createMessageSchema,
+  updateMessageSchema,
   getChatMessagesSchema,
 };

@@ -3,7 +3,6 @@ import { MessageController } from './message.controller';
 import auth from '../../middlewares/auth';
 import validateRequest from '../../middlewares/validateRequest';
 import { MessageValidations } from './message.validation';
-import fileUploadHandler from '../../middlewares/fileUploadHandler';
 
 const router = express.Router();
 
@@ -11,9 +10,16 @@ const router = express.Router();
 router.post(
   '/create',
   auth(),
-  fileUploadHandler(),
   validateRequest(MessageValidations.createMessageSchema),
-  MessageController.createMessage
+  MessageController.createMessage,
+);
+
+// update message
+router.patch(
+  '/:id',
+  auth(),
+  validateRequest(MessageValidations.updateMessageSchema),
+  MessageController.updateMessage,
 );
 
 // get messages by chat id
@@ -21,7 +27,7 @@ router.get(
   '/chat/:id',
   auth(),
   validateRequest(MessageValidations.getChatMessagesSchema),
-  MessageController.getChatMessages
+  MessageController.getChatMessages,
 );
 
 export const MessageRoutes = router;

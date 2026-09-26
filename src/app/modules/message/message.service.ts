@@ -17,17 +17,17 @@ export const createMessage = async (payload: IMessage): Promise<IMessage> => {
   if (!isChatExist)
     throw new ApiError(
       StatusCodes.BAD_REQUEST,
-      'Chat not found or you are not a participant'
+      'Chat not found or you are not a participant',
     );
-  // check if content is provided
-  if (!payload.content)
-    throw new Error('Content is required');
 
   // mark sender as seen
   payload.seenBy = [payload.sender];
 
   const result = await Message.create(payload);
-  const populatedResult = await result.populate('sender', 'firstName lastName image isDeleted');
+  const populatedResult = await result.populate(
+    'sender',
+    'firstName lastName image isDeleted',
+  );
 
   // emit socket event for new message
   //@ts-ignore
@@ -48,11 +48,30 @@ export const createMessage = async (payload: IMessage): Promise<IMessage> => {
   return result;
 };
 
+// ----------------- update message -------------------
+export const updateMessage = async (
+  id: string,
+  payload: IMessage,
+  user: JwtPayload,
+) => {
+  // check if the message exists
+  const existingMessage = await Message.findById(id).select('sender');
+  if (!existingMessage)
+    throw new ApiError(StatusCodes.NOT_FOUND, 'Message not found');
+
+  // check if the user is the sender of the message
+  if (existingMessage.sender.toString() !== user?.id)
+    throw new ApiError(StatusCodes.UNAUTHORIZED, 'You are not authorized');
+
+  const result = await Message.findByIdAndUpdate(id, payload, { new: true });
+  return result;
+};
+
 // ----------------- get messages by chat id -------------------
 export const getChatMessages = async (
   chatId: string,
   query: Record<string, any>,
-  user: JwtPayload
+  user: JwtPayload,
 ) => {
   // check if the chat exists
   const existingChat = await Chat.findOne({
@@ -65,7 +84,7 @@ export const getChatMessages = async (
   // update seen status those messages are not seen by the user
   await Message.updateMany(
     { chat: chatId, seenBy: { $nin: [user?.id] } },
-    { $addToSet: { seenBy: user?.id } }
+    { $addToSet: { seenBy: user?.id } },
   );
 
   // get messages
@@ -73,7 +92,7 @@ export const getChatMessages = async (
     Message.find({ chat: chatId })
       .populate('sender', 'firstName lastName image isDeleted')
       .sort({ createdAt: -1 }),
-    query
+    query,
   )
     .paginate()
     .search(['content']);
@@ -95,4 +114,4 @@ export const getChatMessages = async (
   return { messages: messagesWithStatus, pagination };
 };
 
-export const MessageServices = { createMessage, getChatMessages };
+export const MessageServices = { createMessage, updateMessage, getChatMessages };

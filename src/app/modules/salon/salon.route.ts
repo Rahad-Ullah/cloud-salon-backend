@@ -23,4 +23,11 @@ router.patch(
   SalonController.updateSalon,
 );
 
+// get single salon
+router.get(
+  '/:id',
+  validateRequest(SalonValidations.getSalonByIdValidation),
+  SalonController.getSingleSalon,
+);
+
 export const salonRoutes = router;

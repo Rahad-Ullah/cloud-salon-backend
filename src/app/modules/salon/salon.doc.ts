@@ -26,4 +26,13 @@ export function registerSalonDocs() {
     body: SalonValidations.updateSalonValidation.shape.body,
     isAuth: true,
   });
+
+  // get single salon
+  registerSalon({
+    method: 'get',
+    path: '/salon/:id',
+    summary: 'Get single salon',
+    params: SalonValidations.getSalonByIdValidation.shape.params,
+    isAuth: true,
+  });
 }

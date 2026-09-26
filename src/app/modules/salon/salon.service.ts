@@ -68,7 +68,9 @@ const updateSalon = async (
   user: JwtPayload,
 ): Promise<any> => {
   // check if the salon exists
-  const existingSalon = await Salon.findById(id).select('logo photos');
+  const existingSalon = await Salon.findById(id).select(
+    'logo photos createdBy',
+  );
   if (!existingSalon) {
     throw new ApiError(StatusCodes.NOT_FOUND, 'Salon not found');
   }
@@ -114,7 +116,20 @@ const updateSalon = async (
   return result;
 };
 
+// ---------------- get single salon ---------------
+const getSingleSalon = async (id: string) => {
+  const result = await Salon.findById(id).populate(
+    'createdBy',
+    'firstName lastName email role phone image isSalonOwner',
+  );
+  if (!result) {
+    throw new ApiError(StatusCodes.NOT_FOUND, 'Salon not found');
+  }
+  return result;
+};
+
 export const SalonServices = {
   createSalon,
   updateSalon,
+  getSingleSalon,
 };

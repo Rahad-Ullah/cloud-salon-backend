@@ -7,6 +7,8 @@ interface RegisterRouteOptions {
   tags?: string[];
   summary: string;
   body?: ZodType<any>;
+  query?: AnyZodObject;
+  params?: AnyZodObject;
   headers?: AnyZodObject;
   isAuth?: boolean;
   successDescription?: string;
@@ -18,17 +20,24 @@ export function registerApiRoute({
   tags,
   summary,
   body,
+  query,
+  params,
   headers,
   isAuth = false,
   successDescription = 'Success',
 }: RegisterRouteOptions) {
+  // Converts Express-style "/users/:id" to OpenAPI-style "/users/{id}"
+  const openApiPath = path.replace(/:([a-zA-Z0-9_]+)/g, '{$1}');
+
   registry.registerPath({
     method,
-    path,
+    path: openApiPath,
     tags,
     summary,
     ...(isAuth && { security: [{ bearerAuth: [] }] }),
     request: {
+      ...(params && { params }),
+      ...(query && { query }),
       ...(headers && { headers }),
       ...(body && {
         body: {

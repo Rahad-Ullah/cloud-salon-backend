@@ -52,6 +52,7 @@ router.get(
 router.get(
   '/all',
   auth(UserRole.Admin, UserRole.SuperAdmin),
+  validateRequest(UserValidation.getAllUsersZodSchema),
   UserController.getAllUsers,
 );
 

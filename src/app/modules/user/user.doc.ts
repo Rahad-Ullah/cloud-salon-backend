@@ -28,6 +28,7 @@ export function registerUserDocs() {
     method: 'patch',
     path: '/users/:id/status',
     summary: 'Update user status',
+    params: UserValidation.updateStatusZodSchema.shape.params,
     body: UserValidation.updateStatusZodSchema.shape.body,
     isAuth: true,
   });
@@ -37,6 +38,7 @@ export function registerUserDocs() {
     method: 'delete',
     path: '/users/:id',
     summary: 'Delete user',
+    params: UserValidation.deleteUserZodSchema.shape.params,
     isAuth: true,
   });
 
@@ -53,6 +55,7 @@ export function registerUserDocs() {
     method: 'get',
     path: '/users/:id',
     summary: 'Get user by id',
+    params: UserValidation.getSingleUserZodSchema.shape.params,
     isAuth: true,
   });
 
@@ -61,6 +64,7 @@ export function registerUserDocs() {
     method: 'get',
     path: '/users',
     summary: 'Get all users',
+    query: UserValidation.getAllUsersZodSchema.shape.query,
     isAuth: true,
   });
 }

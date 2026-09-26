@@ -90,10 +90,23 @@ const getSingleUserZodSchema = z.object({
     .strict(),
 });
 
+// get all users
+const getAllUsersZodSchema = z.object({
+  query: z
+    .object({
+      searchTerm: z.string().optional(),
+      status: z.nativeEnum(UserStatus).optional(),
+      page: z.number().optional(),
+      limit: z.number().optional(),
+    })
+    .strict(),
+});
+
 export const UserValidation = {
   createUserZodSchema,
   updateUserZodSchema,
   updateStatusZodSchema,
   deleteUserZodSchema,
   getSingleUserZodSchema,
+  getAllUsersZodSchema,
 };

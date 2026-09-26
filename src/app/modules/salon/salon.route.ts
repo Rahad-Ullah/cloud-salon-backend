@@ -23,6 +23,13 @@ router.patch(
   SalonController.updateSalon,
 );
 
+// get my salon
+router.get(
+  '/my-salon',
+  auth(UserRole.Professional),
+  SalonController.getMySalon,
+);
+
 // get single salon
 router.get(
   '/:id',

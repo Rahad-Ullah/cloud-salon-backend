@@ -27,6 +27,15 @@ export function registerSalonDocs() {
     isAuth: true,
   });
 
+  // get my salon
+  registerSalon({
+    method: 'get',
+    path: '/salon/my-salon',
+    summary: 'Get my salon',
+    roles: ['Professional'],
+    isAuth: true,
+  });
+
   // get single salon
   registerSalon({
     method: 'get',

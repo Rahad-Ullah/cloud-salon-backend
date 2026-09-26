@@ -47,8 +47,21 @@ const getSingleSalon = catchAsync(async (req: Request, res: Response) => {
   });
 });
 
+// get my salon
+const getMySalon = catchAsync(async (req: Request, res: Response) => {
+  const result = await SalonServices.getMySalon(req.user.id as string);
+
+  sendResponse(res, {
+    success: true,
+    statusCode: StatusCodes.OK,
+    message: 'My salon fetched successfully',
+    data: result,
+  });
+});
+
 export const SalonController = {
   createSalon,
   updateSalon,
   getSingleSalon,
+  getMySalon,
 };

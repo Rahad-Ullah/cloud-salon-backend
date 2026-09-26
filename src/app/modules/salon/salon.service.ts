@@ -128,8 +128,21 @@ const getSingleSalon = async (id: string) => {
   return result;
 };
 
+// ---------------- get my salon ---------------
+const getMySalon = async (userId: string) => {
+  const result = await Salon.findOne({ createdBy: userId }).populate(
+    'createdBy',
+    'firstName lastName email role phone image isSalonOwner',
+  );
+  if (!result) {
+    throw new ApiError(StatusCodes.NOT_FOUND, 'Salon not found');
+  }
+  return result;
+};
+
 export const SalonServices = {
   createSalon,
   updateSalon,
   getSingleSalon,
+  getMySalon,
 };

@@ -7,12 +7,12 @@ export function registerSalonDocs() {
   };
 
   // create salon
-  // registerSalon({
-  //   method: 'post',
-  //   path: '/salon/create',
-  //   summary: 'Create salon',
-  //   roles: ['Admin', 'SuperAdmin'],
-  //   body: SalonValidations.createSalonValidation.shape.body,
-  //   isAuth: true,
-  // });
+  registerSalon({
+    method: 'post',
+    path: '/salon/create',
+    summary: 'Create salon',
+    roles: ['Professional'],
+    body: SalonValidations.createSalonValidation.shape.body,
+    isAuth: true,
+  });
 }

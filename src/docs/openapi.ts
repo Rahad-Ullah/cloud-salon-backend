@@ -13,6 +13,7 @@ import { registerSupportDocs } from '../app/modules/support/support.doc';
 import { registerMediaUploadDocs } from '../app/modules/mediaUpload/mediaUpload.doc';
 import { registerChatDocs } from '../app/modules/chat/chat.doc';
 import { registerMessageDocs } from '../app/modules/message/message.doc';
+import { registerSalonDocs } from '../app/modules/salon/salon.doc';
 
 export const registry = new OpenAPIRegistry();
 
@@ -28,6 +29,7 @@ export function generateOpenApiDocumentV1() {
   registerUserDocs();
   registerProfessionalDocs();
   registerMediaUploadDocs();
+  registerSalonDocs();
   registerChatDocs();
   registerMessageDocs();
   registerDisclaimerDocs();

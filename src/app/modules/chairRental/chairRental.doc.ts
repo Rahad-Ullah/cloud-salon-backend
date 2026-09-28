@@ -28,4 +28,43 @@ export function registerChairRentalDocs() {
     body: ChairRentalValidations.updateChairRentalValidation.shape.body,
     isAuth: true,
   });
+
+  // get single chairRental
+  registerChairRental({
+    method: 'get',
+    path: '/chair-rentals/single/:id',
+    summary: 'Get single chairRental',
+    params: ChairRentalValidations.getChairRentalByIdValidation.shape.params,
+    isAuth: true,
+  });
+
+  // get my chairRental
+  registerChairRental({
+    method: 'get',
+    path: '/chair-rentals/my-rental',
+    summary: 'Get my chairRental',
+    roles: ['Professional'],
+    isAuth: true,
+  });
+
+  // get salon chairRental
+  registerChairRental({
+    method: 'get',
+    path: '/chair-rentals/salon/:id',
+    summary: 'Get salon chairRental',
+    roles: ['Professional'],
+    params: ChairRentalValidations.getSalonChairRentalValidation.shape.params,
+    query: ChairRentalValidations.getSalonChairRentalValidation.shape.query,
+    isAuth: true,
+  });
+
+  // get all chairRental
+  registerChairRental({
+    method: 'get',
+    path: '/chair-rentals',
+    summary: 'Get all chairRental',
+    roles: ['Admin', 'SuperAdmin'],
+    query: ChairRentalValidations.getAllChairRentalValidation.shape.query,
+    isAuth: true,
+  });
 }

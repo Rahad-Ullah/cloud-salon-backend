@@ -6,6 +6,8 @@ import { ChairRental } from './chairRental.model';
 import { ChairStatus } from '../chair/chair.constants';
 import { RentalStatus } from './chairRental.constants';
 import { redlock } from '../../../config/redlock';
+import QueryBuilder from '../../builder/QueryBuilder';
+import { Salon } from '../salon/salon.model';
 
 const MS_PER_DAY = 86_400_000;
 const PAYMENT_HOLD_MINUTES = 15;
@@ -136,7 +138,106 @@ const updateChairRental = async (
   return result;
 };
 
+// ------------------ get single by id ------------------
+const getSingleRentalById = async (id: string) => {
+  const result = await ChairRental.findById(id)
+    .populate('salon')
+    .populate('professional')
+    .populate('chair')
+    .populate('transaction');
+
+  if (!result) {
+    throw new ApiError(StatusCodes.NOT_FOUND, 'Rental not found');
+  }
+
+  return result;
+};
+
+// ------------------ get rentals by professional id ------------------
+const getRentalsByProfessionalId = async (
+  professionalId: string,
+  query: Record<string, unknown>,
+) => {
+  const filter = { professional: professionalId, isDeleted: false } as any;
+
+  // pre-filter salon
+  if (query.searchTerm) {
+    const salons = await Salon.find({
+      $or: [{ name: { $regex: query.searchTerm, $options: 'i' } }],
+    });
+    filter.salon = salons.map(salon => salon._id);
+  }
+
+  const rentalQuery = new QueryBuilder(ChairRental.find(filter), query)
+    .filter()
+    .sort()
+    .paginate()
+    .fields();
+
+  const [data, pagination] = await Promise.all([
+    rentalQuery.modelQuery
+      .populate('salon', 'name bio logo email phone')
+      .populate('chair')
+      .lean(),
+    rentalQuery.getPaginationInfo(),
+  ]);
+
+  return { data, pagination };
+};
+
+// ------------------ get rentals by salon id ------------------
+const getRentalsBySalonId = async (
+  salonId: string,
+  query: Record<string, unknown>,
+) => {
+  const rentalQuery = new QueryBuilder(
+    ChairRental.find({ salon: salonId, isDeleted: false }),
+    query,
+  )
+    .filter()
+    .sort()
+    .paginate()
+    .fields();
+
+  const [data, pagination] = await Promise.all([
+    rentalQuery.modelQuery
+      .populate('chair')
+      .populate('professional', 'firstName lastName image email phone')
+      .lean(),
+    rentalQuery.getPaginationInfo(),
+  ]);
+
+  return { data, pagination };
+};
+
+// ------------------ get all rentals ------------------
+const getAllRentals = async (query: Record<string, unknown>) => {
+  const rentalQuery = new QueryBuilder(
+    ChairRental.find({ isDeleted: false }),
+    query,
+  )
+    .filter()
+    .sort()
+    .paginate()
+    .fields();
+
+  const [data, pagination] = await Promise.all([
+    rentalQuery.modelQuery
+      .populate('professional', 'firstName lastName image email phone')
+      .populate('salon', 'name bio logo email phone')
+      .populate('chair')
+      .lean(),
+    rentalQuery.getPaginationInfo(),
+  ]);
+
+  return { data, pagination };
+};
+
 export const ChairRentalServices = {
   createChairRental,
   updateChairRental,
+  getSingleRentalById,
+  getRentalsByProfessionalId,
+  getRentalsBySalonId,
+  getAllRentals,
 };

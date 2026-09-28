@@ -23,4 +23,36 @@ router.patch(
   ChairRentalController.updateChairRental,
 );
 
+// get single chair rental
+router.get(
+  '/single/:id',
+  auth(),
+  validateRequest(ChairRentalValidations.getChairRentalByIdValidation),
+  ChairRentalController.getSingleRentalById,
+);
+
+// get my rentals
+router.get(
+  '/my-rentals',
+  auth(UserRole.Professional),
+  validateRequest(ChairRentalValidations.getMyChairRentalValidation),
+  ChairRentalController.getMyRentals,
+);
+
+// get rentals by salon id
+router.get(
+  '/salon/:id',
+  auth(UserRole.Professional),
+  validateRequest(ChairRentalValidations.getSalonChairRentalValidation),
+  ChairRentalController.getRentalsBySalonId,
+);
+
+// get all rentals
+router.get(
+  '/',
+  auth(UserRole.Admin, UserRole.SuperAdmin),
+  validateRequest(ChairRentalValidations.getAllChairRentalValidation),
+  ChairRentalController.getAllRentals,
+);
+
 export const chairRentalRoutes = router;

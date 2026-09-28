@@ -34,7 +34,70 @@ const updateChairRental = catchAsync(async (req: Request, res: Response) => {
   });
 });
 
+// get single by id
+const getSingleRentalById = catchAsync(async (req: Request, res: Response) => {
+  const result = await ChairRentalServices.getSingleRentalById(
+    req.params.id as string,
+  );
+
+  sendResponse(res, {
+    statusCode: StatusCodes.OK,
+    success: true,
+    message: 'ChairRental fetched successfully',
+    data: result,
+  });
+});
+
+// get my rentals
+const getMyRentals = catchAsync(async (req: Request, res: Response) => {
+  const result = await ChairRentalServices.getRentalsByProfessionalId(
+    req.user.id as string,
+    req.query,
+  );
+
+  sendResponse(res, {
+    statusCode: StatusCodes.OK,
+    success: true,
+    message: 'ChairRental fetched successfully',
+    data: result.data,
+    pagination: result.pagination,
+  });
+});
+
+// get salon rentals
+const getRentalsBySalonId = catchAsync(async (req: Request, res: Response) => {
+  const result = await ChairRentalServices.getRentalsBySalonId(
+    req.params.id as string,
+    req.query,
+  );
+
+  sendResponse(res, {
+    statusCode: StatusCodes.OK,
+    success: true,
+    message: 'ChairRental fetched successfully',
+    data: result.data,
+    pagination: result.pagination,
+  });
+});
+
+// get all rentals
+const getAllRentals = catchAsync(async (req: Request, res: Response) => {
+  const result = await ChairRentalServices.getAllRentals(req.query);
+
+  sendResponse(res, {
+    statusCode: StatusCodes.OK,
+    success: true,
+    message: 'ChairRental fetched successfully',
+    data: result.data,
+    pagination: result.pagination,
+  });
+});
+
 export const ChairRentalController = {
   createChairRental,
   updateChairRental,
+  getSingleRentalById,
+  getMyRentals,
+  getRentalsBySalonId,
+  getAllRentals,
 };

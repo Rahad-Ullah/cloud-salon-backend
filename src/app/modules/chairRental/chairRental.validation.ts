@@ -63,6 +63,19 @@ const getMyChairRentalValidation = z.object({
   }),
 });
 
+const getSalonChairRentalValidation = z.object({
+  params: z.object({
+    id: objectId('Salon ID'),
+  }),
+  query: z.object({
+    searchTerm: z.string().optional(),
+    status: z.string().optional(),
+    paymentStatus: z.string().optional(),
+    page: z.string().optional(),
+    limit: z.string().optional(),
+  }),
+});
+
 const getAllChairRentalValidation = z.object({
   query: z.object({
     searchTerm: z.string().optional(),
@@ -78,5 +91,6 @@ export const ChairRentalValidations = {
   updateChairRentalValidation,
   getChairRentalByIdValidation,
   getMyChairRentalValidation,
+  getSalonChairRentalValidation,
   getAllChairRentalValidation,
 };

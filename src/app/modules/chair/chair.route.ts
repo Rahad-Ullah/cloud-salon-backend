@@ -31,4 +31,28 @@ router.delete(
   ChairController.deleteChair,
 );
 
+// get chair by id
+router.get(
+  '/single/:id',
+  auth(),
+  validateRequest(ChairValidations.getChairByIdValidation),
+  ChairController.getChairById,
+);
+
+// get my chairs
+router.get(
+  '/my-chairs',
+  auth(UserRole.Professional),
+  validateRequest(ChairValidations.getMyChairsValidation),
+  ChairController.getMyChairs,
+);
+
+// get all chairs
+router.get(
+  '/',
+  auth(UserRole.Admin, UserRole.SuperAdmin),
+  validateRequest(ChairValidations.getAllChairsValidation),
+  ChairController.getAllChairs,
+);
+
 export const chairRoutes = router;

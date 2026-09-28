@@ -46,8 +46,52 @@ const deleteChair = catchAsync(async (req: Request, res: Response) => {
   });
 });
 
+// get chair by id
+const getChairById = catchAsync(async (req: Request, res: Response) => {
+  const result = await ChairServices.getChairById(req.params.id as string);
+
+  sendResponse(res, {
+    statusCode: StatusCodes.OK,
+    success: true,
+    message: 'Chair fetched successfully',
+    data: result,
+  });
+});
+
+// get my chairs
+const getMyChairs = catchAsync(async (req: Request, res: Response) => {
+  const result = await ChairServices.getMyChairs(
+    req.user.id as string,
+    req.query,
+  );
+
+  sendResponse(res, {
+    statusCode: StatusCodes.OK,
+    success: true,
+    message: 'Chairs fetched successfully',
+    data: result.data,
+    pagination: result.pagination,
+  });
+});
+
+// get all chairs
+const getAllChairs = catchAsync(async (req: Request, res: Response) => {
+  const result = await ChairServices.getAllChairs(req.query);
+
+  sendResponse(res, {
+    statusCode: StatusCodes.OK,
+    success: true,
+    message: 'Chairs fetched successfully',
+    data: result.data,
+    pagination: result.pagination,
+  });
+});
+
 export const ChairController = {
   createChair,
   updateChair,
   deleteChair,
+  getChairById,
+  getMyChairs,
+  getAllChairs,
 };

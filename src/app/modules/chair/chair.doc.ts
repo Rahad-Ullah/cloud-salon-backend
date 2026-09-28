@@ -36,4 +36,30 @@ export function registerChairDocs() {
     params: ChairValidations.deleteChairValidation.shape.params,
     isAuth: true,
   });
+
+  // get chair by id
+  registerChair({
+    method: 'get',
+    path: '/chairs/single/:id',
+    summary: 'Get chair by id',
+    params: ChairValidations.getChairByIdValidation.shape.params,
+    isAuth: true,
+  });
+
+  // get my chairs
+  registerChair({
+    method: 'get',
+    path: '/chairs/my-chairs',
+    summary: 'Get chairs of my salon',
+    roles: ['Professional'],
+    isAuth: true,
+  });
+
+  // get all chairs
+  registerChair({
+    method: 'get',
+    path: '/chairs',
+    summary: 'Get all chairs',
+    isAuth: true,
+  });
 }

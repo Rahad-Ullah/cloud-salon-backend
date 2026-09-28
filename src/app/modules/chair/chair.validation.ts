@@ -42,9 +42,23 @@ const getChairByIdValidation = z.object({
   }),
 });
 
-const getChairsBySalonIdValidation = z.object({
-  params: z.object({
-    id: objectId('Salon ID'),
+const getMyChairsValidation = z.object({
+  query: z.object({
+    searchTerm: z.string().optional(),
+    status: z.string().optional(),
+    isHealthy: z.string().optional(),
+    page: z.string().optional(),
+    limit: z.string().optional(),
+  }),
+});
+
+const getAllChairsValidation = z.object({
+  query: z.object({
+    searchTerm: z.string().optional(),
+    status: z.string().optional(),
+    isHealthy: z.string().optional(),
+    page: z.string().optional(),
+    limit: z.string().optional(),
   }),
 });
 
@@ -53,5 +67,6 @@ export const ChairValidations = {
   updateChairValidation,
   deleteChairValidation,
   getChairByIdValidation,
-  getChairsBySalonIdValidation,
+  getMyChairsValidation,
+  getAllChairsValidation,
 };

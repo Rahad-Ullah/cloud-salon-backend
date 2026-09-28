@@ -5,6 +5,7 @@ import { Chair } from './chair.model';
 import { Salon } from '../salon/salon.model';
 import { MediaUploadServices } from '../mediaUpload/mediaUpload.service';
 import deleteS3File from '../../../shared/deleteS3File';
+import QueryBuilder from '../../builder/QueryBuilder';
 
 // --------------- create chair service ---------------
 const createChair = async (
@@ -92,8 +93,69 @@ const deleteChair = async (id: string): Promise<IChair> => {
   return result;
 };
 
+// --------------- get chair by id ---------------
+const getChairById = async (id: string): Promise<IChair> => {
+  const result = await Chair.findById(id).populate('salon bookedBy');
+  if (!result) {
+    throw new ApiError(StatusCodes.NOT_FOUND, 'Chair not found');
+  }
+  return result;
+};
+
+// --------------- get my chairs ---------------
+const getMyChairs = async (userId: string, query: Record<string, unknown>) => {
+  // check if salon exists
+  const salon = await Salon.findOne({ createdBy: userId }).select('_id');
+  if (!salon) {
+    throw new ApiError(StatusCodes.NOT_FOUND, 'Salon not found');
+  }
+  const salonId = salon._id;
+
+  const salonQuery = new QueryBuilder(
+    Chair.find({
+      salon: salonId,
+      isDeleted: false,
+    }),
+    query,
+  )
+    .search(['name'])
+    .filter()
+    .sort()
+    .paginate()
+    .fields();
+
+  const [data, pagination] = await Promise.all([
+    salonQuery.modelQuery
+      .populate('bookedBy', 'firstName lastName email phone image')
+      .lean(),
+    salonQuery.getPaginationInfo(),
+  ]);
+
+  return { data, pagination };
+};
+
+// --------------- get all chairs ---------------
+const getAllChairs = async (query: Record<string, unknown>) => {
+  const salonQuery = new QueryBuilder(Chair.find({ isDeleted: false }), query)
+    .search(['name'])
+    .filter()
+    .sort()
+    .paginate()
+    .fields();
+
+  const [data, pagination] = await Promise.all([
+    salonQuery.modelQuery.populate('salon').lean(),
+    salonQuery.getPaginationInfo(),
+  ]);
+
+  return { data, pagination };
+};
+
 export const ChairServices = {
   createChair,
   updateChair,
   deleteChair,
+  getChairById,
+  getMyChairs,
+  getAllChairs,
 };

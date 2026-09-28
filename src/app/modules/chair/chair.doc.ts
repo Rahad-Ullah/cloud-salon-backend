@@ -7,12 +7,12 @@ export function registerChairDocs() {
   };
 
   // create chair
-  // registerChair({
-  //   method: 'post',
-  //   path: '/chair/create',
-  //   summary: 'Create chair',
-  //   roles: ['Admin', 'SuperAdmin'],
-  //   body: ChairValidations.createChairValidation.shape.body,
-  //   isAuth: true,
-  // });
+  registerChair({
+    method: 'post',
+    path: '/chairs/create',
+    summary: 'Create chair',
+    roles: ['Professional'],
+    body: ChairValidations.createChairValidation.shape.body,
+    isAuth: true,
+  });
 }

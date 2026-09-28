@@ -54,6 +54,10 @@ const chairSchema = new Schema<IChair, ChairModel>(
       ref: 'User',
       default: null,
     },
+    isDeleted: {
+      type: Boolean,
+      default: false,
+    },
   },
   {
     timestamps: true,

@@ -1,6 +1,5 @@
 import { z } from 'zod';
 import { objectId } from '../../../shared/objectIdValidator';
-import { ChairStatus } from './chair.constants';
 
 const createChairValidation = z.object({
   body: z.object({

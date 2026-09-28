@@ -15,6 +15,7 @@ import { analyticsRoutes } from '../app/modules/analytics/analytics.route';
 import { mediaUploadRoutes } from '../app/modules/mediaUpload/mediaUpload.route';
 import { professionalRoutes } from '../app/modules/professional/professional.route';
 import { salonRoutes } from '../app/modules/salon/salon.route';
+import { chairRoutes } from '../app/modules/chair/chair.route';
 const router = express.Router();
 
 const apiRoutes: { path: string; route: any }[] = [
@@ -41,6 +42,10 @@ const apiRoutes: { path: string; route: any }[] = [
   {
     path: '/salons',
     route: salonRoutes,
+  },
+  {
+    path: '/chairs',
+    route: chairRoutes,
   },
   {
     path: '/chats',

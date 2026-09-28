@@ -13,6 +13,7 @@ export interface IChair {
   status: ChairStatus;
   salon: Types.ObjectId;
   bookedBy: Types.ObjectId;
+  isDeleted: boolean;
   createdAt: Date;
   updatedAt: Date;
 }

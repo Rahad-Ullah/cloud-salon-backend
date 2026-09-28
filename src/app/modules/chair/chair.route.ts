@@ -23,4 +23,12 @@ router.patch(
   ChairController.updateChair,
 );
 
+// delete chair
+router.delete(
+  '/:id',
+  auth(UserRole.Professional),
+  validateRequest(ChairValidations.deleteChairValidation),
+  ChairController.deleteChair,
+);
+
 export const chairRoutes = router;

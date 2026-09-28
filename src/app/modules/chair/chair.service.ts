@@ -79,7 +79,21 @@ const updateChair = async (id: string, payload: Partial<IChair>) => {
   return result;
 };
 
+// --------------- delete chair service ---------------
+const deleteChair = async (id: string): Promise<IChair> => {
+  const result = await Chair.findByIdAndUpdate(
+    id,
+    { isDeleted: true },
+    { new: true },
+  );
+  if (!result) {
+    throw new ApiError(StatusCodes.NOT_FOUND, 'Chair not found');
+  }
+  return result;
+};
+
 export const ChairServices = {
   createChair,
   updateChair,
+  deleteChair,
 };

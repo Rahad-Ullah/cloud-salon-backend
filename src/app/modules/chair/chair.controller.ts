@@ -34,7 +34,20 @@ const updateChair = catchAsync(async (req: Request, res: Response) => {
   });
 });
 
+// delete chair
+const deleteChair = catchAsync(async (req: Request, res: Response) => {
+  const result = await ChairServices.deleteChair(req.params.id as string);
+
+  sendResponse(res, {
+    statusCode: StatusCodes.OK,
+    success: true,
+    message: 'Chair deleted successfully',
+    data: result,
+  });
+});
+
 export const ChairController = {
   createChair,
   updateChair,
+  deleteChair,
 };

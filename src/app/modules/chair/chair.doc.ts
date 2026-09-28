@@ -26,4 +26,14 @@ export function registerChairDocs() {
     body: ChairValidations.updateChairValidation.shape.body,
     isAuth: true,
   });
+
+  // delete chair
+  registerChair({
+    method: 'delete',
+    path: '/chairs/:id',
+    summary: 'Delete chair',
+    roles: ['Professional'],
+    params: ChairValidations.deleteChairValidation.shape.params,
+    isAuth: true,
+  });
 }

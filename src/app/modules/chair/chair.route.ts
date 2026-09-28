@@ -15,4 +15,12 @@ router.post(
   ChairController.createChair,
 );
 
+// update chair
+router.patch(
+  '/:id',
+  auth(UserRole.Professional),
+  validateRequest(ChairValidations.updateChairValidation),
+  ChairController.updateChair,
+);
+
 export const chairRoutes = router;

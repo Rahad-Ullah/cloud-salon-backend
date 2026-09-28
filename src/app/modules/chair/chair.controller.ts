@@ -19,6 +19,22 @@ const createChair = catchAsync(async (req: Request, res: Response) => {
   });
 });
 
+// update chair
+const updateChair = catchAsync(async (req: Request, res: Response) => {
+  const result = await ChairServices.updateChair(
+    req.params.id as string,
+    req.body,
+  );
+
+  sendResponse(res, {
+    statusCode: StatusCodes.OK,
+    success: true,
+    message: 'Chair updated successfully',
+    data: result,
+  });
+});
+
 export const ChairController = {
   createChair,
+  updateChair,
 };

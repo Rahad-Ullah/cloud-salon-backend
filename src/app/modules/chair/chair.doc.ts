@@ -15,4 +15,15 @@ export function registerChairDocs() {
     body: ChairValidations.createChairValidation.shape.body,
     isAuth: true,
   });
+
+  // update chair
+  registerChair({
+    method: 'patch',
+    path: '/chairs/:id',
+    summary: 'Update chair',
+    roles: ['Professional'],
+    params: ChairValidations.updateChairValidation.shape.params,
+    body: ChairValidations.updateChairValidation.shape.body,
+    isAuth: true,
+  });
 }

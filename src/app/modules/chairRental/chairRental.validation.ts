@@ -3,29 +3,27 @@ import { objectId } from '../../../shared/objectIdValidator';
 import { PaymentStatus, RentalStatus } from './chairRental.constants';
 import { nativeEnum } from 'zod';
 
-const pricingValidationSchema = z.object({
-  total: z
-    .number({ required_error: 'Total price is required' })
-    .min(0, 'Total price cannot be negative'),
-  currency: z.string().default('USD'),
-});
-
 const createChairRentalValidation = z.object({
   body: z
     .object({
       chair: objectId('Chair ID'),
-      salon: objectId('Salon ID'),
-      professional: objectId('Professional ID'),
       startDate: z
         .string({ required_error: 'Start date is required' })
-        .datetime(),
-      endDate: z.string({ required_error: 'End date is required' }).datetime(),
-      durationInDays: z
-        .number({ required_error: 'Duration in days is required' })
-        .int('Duration must be an integer')
-        .min(1, 'Duration must be at least 1 day'),
-      pricing: pricingValidationSchema,
+        .datetime()
+        .refine(
+          data => new Date(data).getTime() >= new Date().setHours(0, 0, 0, 0),
+          {
+            message: 'Start date must be in the future or today',
+          },
+        ),
+      endDate: z
+        .string({ required_error: 'End date is required' })
+        .datetime()
+        .refine(data => new Date(data).getTime() > Date.now(), {
+          message: 'End date must be in the future',
+        }),
     })
+    .strict()
     .refine(data => new Date(data.endDate) > new Date(data.startDate), {
       message: 'End date must be greater than start date',
       path: ['endDate'],
@@ -33,19 +31,25 @@ const createChairRentalValidation = z.object({
 });
 
 const updateChairRentalValidation = z.object({
-  params: z.object({
-    id: objectId('Chair Rental ID'),
-  }),
-  body: z.object({
-    PaymentStatus: nativeEnum(PaymentStatus).optional(),
-    status: nativeEnum(RentalStatus).optional(),
-  }),
+  params: z
+    .object({
+      id: objectId('Chair Rental ID'),
+    })
+    .strict(),
+  body: z
+    .object({
+      PaymentStatus: nativeEnum(PaymentStatus).optional(),
+      status: nativeEnum(RentalStatus).optional(),
+    })
+    .strict(),
 });
 
 const getChairRentalByIdValidation = z.object({
-  params: z.object({
-    id: objectId('Chair Rental ID'),
-  }),
+  params: z
+    .object({
+      id: objectId('Chair Rental ID'),
+    })
+    .strict(),
 });
 
 const getMyChairRentalValidation = z.object({

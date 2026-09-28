@@ -95,7 +95,7 @@ const deleteChair = async (id: string): Promise<IChair> => {
 
 // --------------- get chair by id ---------------
 const getChairById = async (id: string): Promise<IChair> => {
-  const result = await Chair.findById(id).populate('salon bookedBy');
+  const result = await Chair.findById(id).populate('salon');
   if (!result) {
     throw new ApiError(StatusCodes.NOT_FOUND, 'Chair not found');
   }
@@ -125,9 +125,7 @@ const getMyChairs = async (userId: string, query: Record<string, unknown>) => {
     .fields();
 
   const [data, pagination] = await Promise.all([
-    salonQuery.modelQuery
-      .populate('bookedBy', 'firstName lastName email phone image')
-      .lean(),
+    salonQuery.modelQuery.lean(),
     salonQuery.getPaginationInfo(),
   ]);
 

@@ -26,7 +26,6 @@ const updateChairValidation = z.object({
       .number()
       .min(0, 'Price must be 0 or greater')
       .optional(),
-    isHealthy: z.boolean().optional(),
   }),
 });
 
@@ -46,7 +45,6 @@ const getMyChairsValidation = z.object({
   query: z.object({
     searchTerm: z.string().optional(),
     status: z.string().optional(),
-    isHealthy: z.string().optional(),
     page: z.string().optional(),
     limit: z.string().optional(),
   }),
@@ -56,7 +54,6 @@ const getAllChairsValidation = z.object({
   query: z.object({
     searchTerm: z.string().optional(),
     status: z.string().optional(),
-    isHealthy: z.string().optional(),
     page: z.string().optional(),
     limit: z.string().optional(),
   }),

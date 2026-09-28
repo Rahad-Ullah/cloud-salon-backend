@@ -15,6 +15,7 @@ import { registerChatDocs } from '../app/modules/chat/chat.doc';
 import { registerMessageDocs } from '../app/modules/message/message.doc';
 import { registerSalonDocs } from '../app/modules/salon/salon.doc';
 import { registerChairDocs } from '../app/modules/chair/chair.doc';
+import { registerChairRentalDocs } from '../app/modules/chairRental/chairRental.doc';
 
 export const registry = new OpenAPIRegistry();
 
@@ -32,6 +33,7 @@ export function generateOpenApiDocumentV1() {
   registerMediaUploadDocs();
   registerSalonDocs();
   registerChairDocs();
+  registerChairRentalDocs();
   registerChatDocs();
   registerMessageDocs();
   registerDisclaimerDocs();

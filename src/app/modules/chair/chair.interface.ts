@@ -9,10 +9,8 @@ export interface IChair {
   photo: string;
   location: string;
   pricePerDayInUSD: number;
-  isHealthy: boolean;
   status: ChairStatus;
   salon: Types.ObjectId;
-  bookedBy: Types.ObjectId;
   isDeleted: boolean;
   createdAt: Date;
   updatedAt: Date;

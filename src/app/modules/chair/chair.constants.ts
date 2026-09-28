@@ -1,4 +1,4 @@
 export enum ChairStatus {
-  AVAILABLE = 'available',
-  BOOKED = 'booked',
+  Active = 'active',
+  Inactive = 'inactive',
 }

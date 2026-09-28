@@ -35,24 +35,15 @@ const chairSchema = new Schema<IChair, ChairModel>(
       required: true,
       min: [0, 'Price cannot be negative'],
     },
-    isHealthy: {
-      type: Boolean,
-      default: true,
-    },
     status: {
       type: String,
       enum: Object.values(ChairStatus),
-      default: ChairStatus.AVAILABLE,
+      default: ChairStatus.Active,
     },
     salon: {
       type: Schema.Types.ObjectId,
       ref: 'Salon',
       required: true,
-    },
-    bookedBy: {
-      type: Schema.Types.ObjectId,
-      ref: 'User',
-      default: null,
     },
     isDeleted: {
       type: Boolean,

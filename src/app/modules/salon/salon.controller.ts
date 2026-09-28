@@ -67,7 +67,8 @@ const getAllSalons = catchAsync(async (req: Request, res: Response) => {
     success: true,
     statusCode: StatusCodes.OK,
     message: 'All salons fetched successfully',
-    data: result,
+    data: result.data,
+    pagination: result.pagination,
   });
 });
 

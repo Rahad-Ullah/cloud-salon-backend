@@ -8,6 +8,6 @@ export enum RentalStatus {
   Pending = 'pending',
   Confirmed = 'confirmed',
   Cancelled = 'cancelled',
-  InProgress = 'in-progress',
+  Active = 'active',
   Completed = 'completed',
 }

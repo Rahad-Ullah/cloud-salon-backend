@@ -1,6 +1,6 @@
 import { z } from 'zod';
 import { objectId } from '../../../shared/objectIdValidator';
-import { PaymentStatus, RentalStatus } from './chairRental.constants';
+import { RentalStatus } from './chairRental.constants';
 import { nativeEnum } from 'zod';
 
 const createChairRentalValidation = z.object({
@@ -38,8 +38,9 @@ const updateChairRentalValidation = z.object({
     .strict(),
   body: z
     .object({
-      PaymentStatus: nativeEnum(PaymentStatus).optional(),
-      status: nativeEnum(RentalStatus).optional(),
+      status: z
+        .enum([RentalStatus.Confirmed, RentalStatus.Cancelled])
+        .optional(),
     })
     .strict(),
 });

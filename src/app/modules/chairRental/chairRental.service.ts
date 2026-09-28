@@ -73,7 +73,7 @@ const createChairRental = async (payload: IChairRental) => {
         $in: [
           RentalStatus.Pending,
           RentalStatus.Confirmed,
-          RentalStatus.InProgress,
+          RentalStatus.Active,
         ],
       },
       startDate: { $lt: endDate },
@@ -113,6 +113,30 @@ const createChairRental = async (payload: IChairRental) => {
   return result;
 };
 
+// ------------------ update chairRental ------------------
+const updateChairRental = async (
+  id: string,
+  payload: Partial<IChairRental>,
+) => {
+  // check if the rental exists
+  const existingRental = await ChairRental.findById(id);
+  if (!existingRental)
+    throw new ApiError(StatusCodes.NOT_FOUND, 'Rental not found');
+
+  // check if already updated
+  if (existingRental.status === payload.status)
+    throw new ApiError(StatusCodes.CONFLICT, 'Rental already updated');
+
+  const result = await ChairRental.findByIdAndUpdate(id, payload, {
+    new: true,
+  });
+
+  // TODO: 1. handle refund on cancel and notifications
+
+  return result;
+};
+
 export const ChairRentalServices = {
   createChairRental,
+  updateChairRental,
 };

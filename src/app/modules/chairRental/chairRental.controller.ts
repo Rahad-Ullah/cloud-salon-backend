@@ -19,6 +19,22 @@ const createChairRental = catchAsync(async (req: Request, res: Response) => {
   });
 });
 
+// update chair rental
+const updateChairRental = catchAsync(async (req: Request, res: Response) => {
+  const result = await ChairRentalServices.updateChairRental(
+    req.params.id as string,
+    req.body,
+  );
+
+  sendResponse(res, {
+    statusCode: StatusCodes.OK,
+    success: true,
+    message: 'ChairRental updated successfully',
+    data: result,
+  });
+});
+
 export const ChairRentalController = {
   createChairRental,
+  updateChairRental,
 };

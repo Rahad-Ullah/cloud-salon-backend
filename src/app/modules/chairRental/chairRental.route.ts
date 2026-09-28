@@ -15,4 +15,12 @@ router.post(
   ChairRentalController.createChairRental,
 );
 
+// update chair rental
+router.patch(
+  '/:id',
+  auth(UserRole.Professional),
+  validateRequest(ChairRentalValidations.updateChairRentalValidation),
+  ChairRentalController.updateChairRental,
+);
+
 export const chairRentalRoutes = router;

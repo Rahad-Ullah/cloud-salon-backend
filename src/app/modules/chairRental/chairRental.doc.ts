@@ -17,4 +17,15 @@ export function registerChairRentalDocs() {
     body: ChairRentalValidations.createChairRentalValidation.shape.body,
     isAuth: true,
   });
+
+  // update chairRental
+  registerChairRental({
+    method: 'patch',
+    path: '/chair-rentals/:id',
+    summary: 'Update chairRental',
+    roles: ['Professional'],
+    params: ChairRentalValidations.updateChairRentalValidation.shape.params,
+    body: ChairRentalValidations.updateChairRentalValidation.shape.body,
+    isAuth: true,
+  });
 }

@@ -26,4 +26,23 @@ export function registerCategoryDocs() {
     body: CategoryValidations.updateCategoryValidation.shape.body,
     isAuth: true,
   });
+
+  // delete category
+  registerCategory({
+    method: 'delete',
+    path: '/categories/:id',
+    summary: 'Delete category',
+    roles: ['Admin', 'SuperAdmin'],
+    params: CategoryValidations.deleteCategoryValidation.shape.params,
+    isAuth: true,
+  });
+
+  // get all categories
+  registerCategory({
+    method: 'get',
+    path: '/categories',
+    summary: 'Get all categories',
+    query: CategoryValidations.getAllCategoriesValidation.shape.query,
+    isAuth: false,
+  });
 }

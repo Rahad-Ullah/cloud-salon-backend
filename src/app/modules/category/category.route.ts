@@ -23,4 +23,19 @@ router.patch(
   CategoryController.updateCategory,
 );
 
+// delete category
+router.delete(
+  '/:id',
+  auth(UserRole.Admin, UserRole.SuperAdmin),
+  validateRequest(CategoryValidations.deleteCategoryValidation),
+  CategoryController.deleteCategory,
+);
+
+// get all categories
+router.get(
+  '/',
+  validateRequest(CategoryValidations.getAllCategoriesValidation),
+  CategoryController.getAllCategories,
+);
+
 export const categoryRoutes = router;

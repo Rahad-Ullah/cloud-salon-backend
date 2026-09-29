@@ -4,6 +4,7 @@ import { ICategory } from './category.interface';
 import { Category } from './category.model';
 import { MediaUploadServices } from '../mediaUpload/mediaUpload.service';
 import deleteS3File from '../../../shared/deleteS3File';
+import QueryBuilder from '../../builder/QueryBuilder';
 
 // --------------- create category ---------------
 const createCategory = async (payload: ICategory): Promise<ICategory> => {
@@ -59,7 +60,42 @@ const updateCategory = async (id: string, payload: Partial<ICategory>) => {
   return result;
 };
 
+// --------------- delete category ---------------
+const deleteCategory = async (id: string): Promise<ICategory> => {
+  const result = await Category.findByIdAndUpdate(
+    id,
+    { isDeleted: true },
+    { new: true },
+  );
+  if (!result) {
+    throw new ApiError(StatusCodes.NOT_FOUND, 'Category not found');
+  }
+  return result;
+};
+
+// ----------------- get all categories ---------------
+const getAllCategories = async (query: Record<string, unknown>) => {
+  const categoryQuery = new QueryBuilder(
+    Category.find({ isDeleted: false }),
+    query,
+  )
+    .search(['name'])
+    .filter()
+    .sort()
+    .paginate()
+    .fields();
+
+  const [data, pagination] = await Promise.all([
+    categoryQuery.modelQuery.lean(),
+    categoryQuery.getPaginationInfo(),
+  ]);
+
+  return { data, pagination };
+};
+
 export const CategoryServices = {
   createCategory,
   updateCategory,
+  deleteCategory,
+  getAllCategories,
 };

@@ -20,13 +20,17 @@ const deleteCategoryValidation = z.object({
   params: z.object({ id: objectId('Category ID') }),
 });
 
-const getCategoryByIdValidation = z.object({
-  params: z.object({ id: objectId('Category ID') }),
+const getAllCategoriesValidation = z.object({
+  query: z.object({
+    searchTerm: z.string().optional(),
+    page: z.string().optional(),
+    limit: z.string().optional(),
+  }),
 });
 
 export const CategoryValidations = {
   createCategoryValidation,
   updateCategoryValidation,
   deleteCategoryValidation,
-  getCategoryByIdValidation,
+  getAllCategoriesValidation,
 };

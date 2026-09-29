@@ -7,12 +7,23 @@ export function registerCategoryDocs() {
   };
 
   // create category
-  // registerCategory({
-  //   method: 'post',
-  //   path: '/category/create',
-  //   summary: 'Create category',
-  //   roles: ['Admin', 'SuperAdmin'],
-  //   body: CategoryValidations.createCategoryValidation.shape.body,
-  //   isAuth: true,
-  // });
+  registerCategory({
+    method: 'post',
+    path: '/categories/create',
+    summary: 'Create category',
+    roles: ['Admin', 'SuperAdmin'],
+    body: CategoryValidations.createCategoryValidation.shape.body,
+    isAuth: true,
+  });
+
+  // update category
+  registerCategory({
+    method: 'patch',
+    path: '/categories/:id',
+    summary: 'Update category',
+    roles: ['Admin', 'SuperAdmin'],
+    params: CategoryValidations.updateCategoryValidation.shape.params,
+    body: CategoryValidations.updateCategoryValidation.shape.body,
+    isAuth: true,
+  });
 }

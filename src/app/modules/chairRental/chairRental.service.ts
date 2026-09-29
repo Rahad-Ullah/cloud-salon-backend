@@ -8,12 +8,14 @@ import { RentalStatus } from './chairRental.constants';
 import { redlock } from '../../../config/redlock';
 import QueryBuilder from '../../builder/QueryBuilder';
 import { Salon } from '../salon/salon.model';
+import { Professional } from '../professional/professional.model';
 
 const MS_PER_DAY = 86_400_000;
 const PAYMENT_HOLD_MINUTES = 15;
 
 // ------------------ create chairRental ------------------
 const createChairRental = async (payload: IChairRental) => {
+
   const startDate = new Date(payload.startDate);
   const endDate = new Date(payload.endDate);
 
@@ -69,6 +71,7 @@ const createChairRental = async (payload: IChairRental) => {
 
     // 4. Check for overlapping rentals (Confirmed OR active pending holds)
     const existingRental = await ChairRental.exists({
+      
       chair: payload.chair,
       isDeleted: false,
       status: {
@@ -233,6 +236,51 @@ const getAllRentals = async (query: Record<string, unknown>) => {
   return { data, pagination };
 };
 
+// ---------------- get active rentals ----------------
+const getActiveRentals = async (query: Record<string, unknown>) => {
+  const filter = { status: RentalStatus.Active, isDeleted: false } as any;
+
+  // pre-filter professional searching
+  if (query.searchTerm) {
+    const professionals = await Professional.find({
+      $or: [{ title: { $regex: query.searchTerm, $options: 'i' } }],
+    });
+    filter.professional = professionals.map(professional => professional.user);
+  }
+
+  // filter salon by distance
+  if (query.distance) {
+    const distanceInKm = Number(query.distance);
+    filter.salon = await Salon.find({
+      location: {
+        $near: {
+          $geometry: {
+            type: 'Point',
+            coordinates: [query.longitude, query.latitude],
+          },
+          $maxDistance: distanceInKm * 1000,
+        },
+      },
+    });
+  }
+
+  const rentalQuery = new QueryBuilder(ChairRental.find(filter), query)
+    .filter(['salon', 'professional', 'distance', 'latitude', 'longitude'])
+    .sort()
+    .paginate()
+    .fields();
+
+  const [data, pagination] = await Promise.all([
+    rentalQuery.modelQuery
+      .populate({ path: 'professional', populate: 'roleRef' })
+      .populate('salon')
+      .lean(),
+    rentalQuery.getPaginationInfo(),
+  ]);
+
+  return { data, pagination };
+};
+
 export const ChairRentalServices = {
   createChairRental,
   updateChairRental,
@@ -240,4 +288,5 @@ export const ChairRentalServices = {
   getRentalsByProfessionalId,
   getRentalsBySalonId,
   getAllRentals,
+  getActiveRentals,
 };

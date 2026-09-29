@@ -18,6 +18,7 @@ import { salonRoutes } from '../app/modules/salon/salon.route';
 import { chairRoutes } from '../app/modules/chair/chair.route';
 import { chairRentalRoutes } from '../app/modules/chairRental/chairRental.route';
 import { categoryRoutes } from '../app/modules/category/category.route';
+import { serviceRoutes } from '../app/modules/service/service.route';
 const router = express.Router();
 
 const apiRoutes: { path: string; route: any }[] = [
@@ -56,6 +57,10 @@ const apiRoutes: { path: string; route: any }[] = [
   {
     path: '/categories',
     route: categoryRoutes,
+  },
+  {
+    path: '/services',
+    route: serviceRoutes,
   },
   {
     path: '/chats',

@@ -9,10 +9,7 @@ const createServiceValidation = z.object({
         .string({ required_error: 'Name is required' })
         .trim()
         .min(1, 'Name cannot be empty'),
-      category: z
-        .string({ required_error: 'Category is required' })
-        .trim()
-        .min(1, 'Category cannot be empty'),
+      category: objectId('Category ID'),
       description: z
         .string({ required_error: 'Description is required' })
         .trim()
@@ -36,7 +33,7 @@ const updateServiceValidation = z.object({
   body: z
     .object({
       name: z.string().trim().min(1).optional(),
-      category: z.string().trim().min(1).optional(),
+      category: objectId('Category ID').optional(),
       description: z.string().trim().min(1).optional(),
       priceInUSD: z.number().nonnegative().optional(),
       durationInMinutes: z.number().positive().optional(),

@@ -17,9 +17,9 @@ const serviceSchema = new Schema<IService, ServiceModel>(
       trim: true,
     },
     category: {
-      type: String,
+      type: Schema.Types.ObjectId,
+      ref: 'Category',
       required: true,
-      trim: true,
     },
     description: {
       type: String,

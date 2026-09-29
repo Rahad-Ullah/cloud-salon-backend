@@ -50,7 +50,7 @@ router.get(
 // get all chairs
 router.get(
   '/',
-  auth(UserRole.Admin, UserRole.SuperAdmin),
+  auth(UserRole.Professional, UserRole.Admin, UserRole.SuperAdmin),
   validateRequest(ChairValidations.getAllChairsValidation),
   ChairController.getAllChairs,
 );

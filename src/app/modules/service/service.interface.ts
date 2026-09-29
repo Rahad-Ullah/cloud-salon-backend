@@ -5,7 +5,7 @@ export interface IService {
   _id: Types.ObjectId;
   uid: string;
   name: string;
-  category: string;
+  category: Types.ObjectId;
   description: string;
   priceInUSD: number;
   durationInMinutes: number;

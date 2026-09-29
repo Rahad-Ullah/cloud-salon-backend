@@ -7,12 +7,23 @@ export function registerServiceDocs() {
   };
 
   // create service
-  // registerService({
-  //   method: 'post',
-  //   path: '/service/create',
-  //   summary: 'Create service',
-  //   roles: ['Admin', 'SuperAdmin'],
-  //   body: ServiceValidations.createServiceValidation.shape.body,
-  //   isAuth: true,
-  // });
+  registerService({
+    method: 'post',
+    path: '/services/create',
+    summary: 'Create service',
+    roles: ['Professional'],
+    body: ServiceValidations.createServiceValidation.shape.body,
+    isAuth: true,
+  });
+
+  // update service
+  registerService({
+    method: 'patch',
+    path: '/services/:id',
+    summary: 'Update service',
+    roles: ['Professional'],
+    params: ServiceValidations.updateServiceValidation.shape.params,
+    body: ServiceValidations.updateServiceValidation.shape.body,
+    isAuth: true,
+  });
 }

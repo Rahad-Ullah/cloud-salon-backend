@@ -27,6 +27,16 @@ export function registerReviewDocs() {
     isAuth: true,
   });
 
+  // delete review
+  registerReview({
+    method: 'delete',
+    path: '/reviews/:id',
+    summary: 'Delete review',
+    roles: ['Customer', 'Professional'],
+    params: ReviewValidations.deleteReviewValidation.shape.params,
+    isAuth: true,
+  });
+
   // get single review
   registerReview({
     method: 'get',

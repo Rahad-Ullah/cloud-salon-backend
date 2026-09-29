@@ -23,6 +23,14 @@ router.patch(
   ReviewController.updateReview,
 );
 
+// delete review
+router.delete(
+  '/:id',
+  auth(UserRole.Customer, UserRole.Professional),
+  validateRequest(ReviewValidations.deleteReviewValidation),
+  ReviewController.deleteReview,
+);
+
 // get single review
 router.get(
   '/single/:id',

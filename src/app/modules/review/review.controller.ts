@@ -35,6 +35,21 @@ const updateReview = catchAsync(async (req: Request, res: Response) => {
   });
 });
 
+// delete review
+const deleteReview = catchAsync(async (req: Request, res: Response) => {
+  const result = await ReviewServices.deleteReview(
+    req.params.id as string,
+    req.user,
+  );
+
+  sendResponse(res, {
+    statusCode: StatusCodes.OK,
+    success: true,
+    message: 'Review deleted successfully',
+    data: result,
+  });
+});
+
 // get single review
 const getSingleReview = catchAsync(async (req: Request, res: Response) => {
   const result = await ReviewServices.getSingleReview(req.params.id as string);
@@ -76,6 +91,7 @@ const getAllReviews = catchAsync(async (req: Request, res: Response) => {
 export const ReviewController = {
   createReview,
   updateReview,
+  deleteReview,
   getSingleReview,
   getMyReviews,
   getAllReviews,

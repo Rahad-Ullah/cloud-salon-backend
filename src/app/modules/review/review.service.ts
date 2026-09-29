@@ -47,6 +47,32 @@ const updateReview = async (
   return result;
 };
 
+// -------------- delete review ---------------
+const deleteReview = async (id: string, user: JwtPayload) => {
+  // check if review exists
+  const review = await Review.findById(id);
+  if (!review) {
+    throw new ApiError(StatusCodes.NOT_FOUND, 'Review not found');
+  }
+
+  // check if user is authorized
+  if (
+    review.user.toString() !== user.id &&
+    ![UserRole.Admin, UserRole.SuperAdmin].includes(user.role)
+  ) {
+    throw new ApiError(StatusCodes.UNAUTHORIZED, 'Unauthorized');
+  }
+
+  const result = await Review.findByIdAndUpdate(
+    id,
+    { isDeleted: true },
+    {
+      new: true,
+    },
+  );
+  return result;
+};
+
 // -------------- get single review ---------------
 const getSingleReview = async (id: string) => {
   const result = await Review.findById(id)
@@ -114,6 +140,7 @@ const getAllReviews = async (query: any) => {
 export const ReviewServices = {
   createReview,
   updateReview,
+  deleteReview,
   getSingleReview,
   getMyReviews,
   getAllReviews,

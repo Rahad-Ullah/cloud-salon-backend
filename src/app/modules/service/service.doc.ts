@@ -21,9 +21,19 @@ export function registerServiceDocs() {
     method: 'patch',
     path: '/services/:id',
     summary: 'Update service',
-    roles: ['Professional'],
+    roles: ['Professional', 'Admin', 'SuperAdmin'],
     params: ServiceValidations.updateServiceValidation.shape.params,
     body: ServiceValidations.updateServiceValidation.shape.body,
+    isAuth: true,
+  });
+
+  // delete service
+  registerService({
+    method: 'delete',
+    path: '/services/:id',
+    summary: 'Delete service',
+    roles: ['Professional', 'Admin', 'SuperAdmin'],
+    params: ServiceValidations.deleteServiceValidation.shape.params,
     isAuth: true,
   });
 

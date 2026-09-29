@@ -18,9 +18,17 @@ router.post(
 // update service
 router.patch(
   '/:id',
-  auth(UserRole.Professional),
+  auth(UserRole.Professional, UserRole.Admin, UserRole.SuperAdmin),
   validateRequest(ServiceValidations.updateServiceValidation),
   ServiceController.updateService,
+);
+
+// delete service
+router.delete(
+  '/:id',
+  auth(UserRole.Professional, UserRole.Admin, UserRole.SuperAdmin),
+  validateRequest(ServiceValidations.deleteServiceValidation),
+  ServiceController.deleteService,
 );
 
 // get single service

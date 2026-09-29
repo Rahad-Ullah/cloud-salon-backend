@@ -54,6 +54,19 @@ const updateService = async (id: string, payload: Partial<IService>) => {
   return result;
 };
 
+// ----------------- delete service -----------------
+const deleteService = async (id: string): Promise<IService> => {
+  const result = await Service.findByIdAndUpdate(
+    id,
+    { isDeleted: true },
+    { new: true },
+  );
+  if (!result) {
+    throw new ApiError(StatusCodes.NOT_FOUND, 'Service not found');
+  }
+  return result;
+};
+
 // --------------- get single service ---------------
 const getSingleService = async (id: string) => {
   const result = await Service.findById(id)
@@ -127,6 +140,7 @@ const getAllServices = async (query: Record<string, unknown>) => {
 export const ServiceServices = {
   createService,
   updateService,
+  deleteService,
   getSingleService,
   getServicesByProfessional,
   getAllServices,

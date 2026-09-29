@@ -64,6 +64,19 @@ const getMyServicesValidation = z.object({
   }),
 });
 
+const getProfessionalServicesValidation = z.object({
+  params: z.object({
+    id: objectId('Professional ID'),
+  }),
+  query: z.object({
+    searchTerm: z.string().optional(),
+    status: z.string().optional(),
+    category: z.string().optional(),
+    page: z.string().optional(),
+    limit: z.string().optional(),
+  }),
+});
+
 const getAllServicesValidation = z.object({
   query: z.object({
     searchTerm: z.string().optional(),
@@ -80,5 +93,6 @@ export const ServiceValidations = {
   deleteServiceValidation,
   getServiceByIdValidation,
   getMyServicesValidation,
+  getProfessionalServicesValidation,
   getAllServicesValidation,
 };

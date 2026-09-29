@@ -34,7 +34,72 @@ const updateService = catchAsync(async (req: Request, res: Response) => {
   });
 });
 
+// get single service
+const getSingleService = catchAsync(async (req: Request, res: Response) => {
+  const result = await ServiceServices.getSingleService(
+    req.params.id as string,
+  );
+
+  sendResponse(res, {
+    statusCode: StatusCodes.OK,
+    success: true,
+    message: 'Service fetched successfully',
+    data: result,
+  });
+});
+
+// get my services
+const getMyServices = catchAsync(async (req: Request, res: Response) => {
+  const result = await ServiceServices.getServicesByProfessional(
+    req.user.id as string,
+    req.query,
+  );
+
+  sendResponse(res, {
+    statusCode: StatusCodes.OK,
+    success: true,
+    message: 'Services fetched successfully',
+    data: result.data,
+    pagination: result.pagination,
+  });
+});
+
+// get by professional
+const getServicesByProfessional = catchAsync(
+  async (req: Request, res: Response) => {
+    const result = await ServiceServices.getServicesByProfessional(
+      req.params.id as string,
+      req.query,
+    );
+
+    sendResponse(res, {
+      statusCode: StatusCodes.OK,
+      success: true,
+      message: 'Services fetched successfully',
+      data: result.data,
+      pagination: result.pagination,
+    });
+  },
+);
+
+// get all services
+const getAllServices = catchAsync(async (req: Request, res: Response) => {
+  const result = await ServiceServices.getAllServices(req.query);
+
+  sendResponse(res, {
+    statusCode: StatusCodes.OK,
+    success: true,
+    message: 'Services fetched successfully',
+    data: result.data,
+    pagination: result.pagination,
+  });
+});
+
 export const ServiceController = {
   createService,
   updateService,
+  getSingleService,
+  getMyServices,
+  getServicesByProfessional,
+  getAllServices,
 };

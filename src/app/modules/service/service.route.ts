@@ -23,4 +23,33 @@ router.patch(
   ServiceController.updateService,
 );
 
+// get single service
+router.get(
+  '/single/:id',
+  validateRequest(ServiceValidations.getServiceByIdValidation),
+  ServiceController.getSingleService,
+);
+
+// get my services
+router.get(
+  '/my-services',
+  auth(UserRole.Professional),
+  validateRequest(ServiceValidations.getMyServicesValidation),
+  ServiceController.getMyServices,
+);
+
+// get by professional
+router.get(
+  '/professional/:id',
+  validateRequest(ServiceValidations.getProfessionalServicesValidation),
+  ServiceController.getServicesByProfessional,
+);
+
+// get all services
+router.get(
+  '/all',
+  validateRequest(ServiceValidations.getAllServicesValidation),
+  ServiceController.getAllServices,
+);
+
 export const serviceRoutes = router;

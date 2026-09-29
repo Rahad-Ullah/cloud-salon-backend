@@ -26,4 +26,41 @@ export function registerServiceDocs() {
     body: ServiceValidations.updateServiceValidation.shape.body,
     isAuth: true,
   });
+
+  // get single service
+  registerService({
+    method: 'get',
+    path: '/services/single/:id',
+    summary: 'Get single service',
+    params: ServiceValidations.getServiceByIdValidation.shape.params,
+    isAuth: false,
+  });
+
+  // get my services
+  registerService({
+    method: 'get',
+    path: '/services/my-services',
+    summary: 'Get my services',
+    query: ServiceValidations.getMyServicesValidation.shape.query,
+    isAuth: true,
+  });
+
+  // get by professional
+  registerService({
+    method: 'get',
+    path: '/services/professional/:id',
+    summary: 'Get services by professional',
+    params: ServiceValidations.getProfessionalServicesValidation.shape.params,
+    query: ServiceValidations.getProfessionalServicesValidation.shape.query,
+    isAuth: false,
+  });
+
+  // get all services
+  registerService({
+    method: 'get',
+    path: '/services/all',
+    summary: 'Get all services',
+    query: ServiceValidations.getAllServicesValidation.shape.query,
+    isAuth: false,
+  });
 }

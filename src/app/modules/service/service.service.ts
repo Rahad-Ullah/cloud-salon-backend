@@ -3,6 +3,7 @@ import ApiError from '../../../errors/ApiError';
 import { IService } from './service.interface';
 import { Service } from './service.model';
 import { Category } from '../category/category.model';
+import QueryBuilder from '../../builder/QueryBuilder';
 
 // ----------------- create service -----------------
 const createService = async (payload: IService): Promise<IService> => {
@@ -53,7 +54,80 @@ const updateService = async (id: string, payload: Partial<IService>) => {
   return result;
 };
 
+// --------------- get single service ---------------
+const getSingleService = async (id: string) => {
+  const result = await Service.findById(id)
+    .populate('category')
+    .populate(
+      'createdBy',
+      'firstName lastName role isSalonOwner email phone image',
+    );
+
+  if (!result) {
+    throw new ApiError(StatusCodes.NOT_FOUND, 'Service not found');
+  }
+  return result;
+};
+
+// ---------------- get services by professional ----------------
+const getServicesByProfessional = async (
+  professionalId: string,
+  query: Record<string, unknown>,
+) => {
+  const serviceQuery = new QueryBuilder(
+    Service.find({ createdBy: professionalId, isDeleted: false }),
+    query,
+  )
+    .search(['name'])
+    .filter()
+    .sort()
+    .paginate()
+    .fields();
+
+  const [data, pagination] = await Promise.all([
+    serviceQuery.modelQuery
+      .populate('category')
+      .populate(
+        'createdBy',
+        'firstName lastName role isSalonOwner image email phone',
+      )
+      .lean(),
+    serviceQuery.getPaginationInfo(),
+  ]);
+
+  return { data, pagination };
+};
+
+// ----------------- get all services -----------------
+const getAllServices = async (query: Record<string, unknown>) => {
+  const serviceQuery = new QueryBuilder(
+    Service.find({ isDeleted: false }),
+    query,
+  )
+    .search(['name'])
+    .filter()
+    .sort()
+    .paginate()
+    .fields();
+
+  const [data, pagination] = await Promise.all([
+    serviceQuery.modelQuery
+      .populate('category')
+      .populate(
+        'createdBy',
+        'firstName lastName role isSalonOwner image email phone',
+      )
+      .lean(),
+    serviceQuery.getPaginationInfo(),
+  ]);
+
+  return { data, pagination };
+};
+
 export const ServiceServices = {
   createService,
   updateService,
+  getSingleService,
+  getServicesByProfessional,
+  getAllServices,
 };

@@ -18,7 +18,7 @@ const reviewSchema = new Schema<IReview, ReviewModel>(
     entity: {
       type: Schema.Types.ObjectId,
       required: true,
-      refPath: 'entityType', // Dynamically resolves to 'professional' or 'salon' model
+      refPath: 'entityModel', // Dynamically resolves to 'user' or 'salon' model
       index: true,
     },
     rating: {
@@ -43,5 +43,16 @@ const reviewSchema = new Schema<IReview, ReviewModel>(
 
 // indexes
 reviewSchema.index({ entity: 1, entityType: 1, isDeleted: 1 });
+
+// virtual field
+reviewSchema.virtual('entityModel').get(function () {
+  if (!this.entityType) return null;
+
+  // Converts snake_case ('super_admin') to PascalCase ('SuperAdmin')
+  return this.entityType
+    .split('_')
+    .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+    .join('');
+});
 
 export const Review = model<IReview, ReviewModel>('Review', reviewSchema);

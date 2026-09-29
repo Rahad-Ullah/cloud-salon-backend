@@ -23,4 +23,26 @@ router.patch(
   ReviewController.updateReview,
 );
 
+// get single review
+router.get(
+  '/single/:id',
+  validateRequest(ReviewValidations.getReviewByIdValidation),
+  ReviewController.getSingleReview,
+);
+
+// get my reviews
+router.get(
+  '/me',
+  auth(UserRole.Customer, UserRole.Professional),
+  validateRequest(ReviewValidations.getMyReviewsValidation),
+  ReviewController.getMyReviews,
+);
+
+// get all reviews
+router.get(
+  '/',
+  validateRequest(ReviewValidations.getAllReviewsValidation),
+  ReviewController.getAllReviews,
+);
+
 export const reviewRoutes = router;

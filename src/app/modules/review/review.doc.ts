@@ -26,4 +26,32 @@ export function registerReviewDocs() {
     body: ReviewValidations.updateReviewValidation.shape.body,
     isAuth: true,
   });
+
+  // get single review
+  registerReview({
+    method: 'get',
+    path: '/reviews/single/:id',
+    summary: 'Get single review',
+    roles: ['Customer', 'Professional'],
+    params: ReviewValidations.getReviewByIdValidation.shape.params,
+    isAuth: false,
+  });
+
+  // get my reviews
+  registerReview({
+    method: 'get',
+    path: '/reviews/me',
+    summary: 'Get my reviews',
+    roles: ['Customer', 'Professional'],
+    isAuth: true,
+  });
+
+  // get all reviews
+  registerReview({
+    method: 'get',
+    path: '/reviews',
+    summary: 'Get all reviews',
+    query: ReviewValidations.getAllReviewsValidation.shape.query,
+    isAuth: false,
+  });
 }

@@ -54,6 +54,14 @@ const getReviewByIdValidation = z.object({
   }),
 });
 
+const getMyReviewsValidation = z.object({
+  query: z.object({
+    page: z.string().optional(),
+    limit: z.string().optional(),
+    sort: z.string().optional(),
+  }),
+});
+
 const getAllReviewsValidation = z.object({
   query: z.object({
     entityType: nativeEnum(EntityType).optional(),
@@ -69,5 +77,6 @@ export const ReviewValidations = {
   updateReviewValidation,
   deleteReviewValidation,
   getReviewByIdValidation,
+  getMyReviewsValidation,
   getAllReviewsValidation,
 };

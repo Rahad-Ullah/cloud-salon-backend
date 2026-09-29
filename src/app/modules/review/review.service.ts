@@ -6,12 +6,14 @@ import { IReview } from './review.interface';
 import { Review } from './review.model';
 import { JwtPayload } from 'jsonwebtoken';
 import { User } from '../user/user.model';
+import QueryBuilder from '../../builder/QueryBuilder';
+import { UserRole } from '../user/user.constant';
 
-// --------------- create review ---------------
+// --------------- create review ---------------/*
 const createReview = async (payload: IReview): Promise<IReview> => {
   // check if entity is valid
   let entity: any = null;
-  if (payload.entityType === EntityType.Professional) {
+  if (payload.entityType === EntityType.User) {
     entity = await User.exists({ _id: payload.entity });
   } else if (payload.entityType === EntityType.Salon) {
     entity = await Salon.exists({ _id: payload.entity });
@@ -45,7 +47,74 @@ const updateReview = async (
   return result;
 };
 
+// -------------- get single review ---------------
+const getSingleReview = async (id: string) => {
+  const result = await Review.findById(id)
+    .populate('user', 'firstName lastName role isSalonOwner image email phone')
+    .populate('entity');
+
+  return result;
+};
+
+// -------------- get my reviews ---------------
+const getMyReviews = async (
+  user: JwtPayload,
+  query: Record<string, unknown>,
+) => {
+  const filter = { isDeleted: false } as any;
+  if (user.role === UserRole.Customer) {
+    filter.user = user.id;
+  } else if (user.role === UserRole.Professional) {
+    filter.entityType = EntityType.User;
+    filter.entity = user.id;
+  }
+
+  const reviewQuery = new QueryBuilder(Review.find(filter), query)
+    .filter()
+    .sort()
+    .paginate()
+    .fields();
+
+  const [data, pagination] = await Promise.all([
+    reviewQuery.modelQuery
+      .populate(
+        'user',
+        'firstName lastName role isSalonOwner image email phone',
+      )
+      .populate('entity')
+      .lean(),
+    reviewQuery.getPaginationInfo(),
+  ]);
+
+  return { data, pagination };
+};
+
+// ----------------- get all reviews ------------------
+const getAllReviews = async (query: any) => {
+  const reviewQuery = new QueryBuilder(Review.find({ isDeleted: false }), query)
+    .filter()
+    .sort()
+    .paginate()
+    .fields();
+
+  const [data, pagination] = await Promise.all([
+    reviewQuery.modelQuery
+      .populate(
+        'user',
+        'firstName lastName role isSalonOwner image email phone',
+      )
+      .populate('entity')
+      .lean(),
+    reviewQuery.getPaginationInfo(),
+  ]);
+
+  return { data, pagination };
+};
+
 export const ReviewServices = {
   createReview,
   updateReview,
+  getSingleReview,
+  getMyReviews,
+  getAllReviews,
 };

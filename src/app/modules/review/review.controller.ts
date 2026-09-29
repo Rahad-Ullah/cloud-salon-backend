@@ -35,7 +35,48 @@ const updateReview = catchAsync(async (req: Request, res: Response) => {
   });
 });
 
+// get single review
+const getSingleReview = catchAsync(async (req: Request, res: Response) => {
+  const result = await ReviewServices.getSingleReview(req.params.id as string);
+
+  sendResponse(res, {
+    statusCode: StatusCodes.OK,
+    success: true,
+    message: 'Review fetched successfully',
+    data: result,
+  });
+});
+
+// get my reviews
+const getMyReviews = catchAsync(async (req: Request, res: Response) => {
+  const result = await ReviewServices.getMyReviews(req.user, req.query);
+
+  sendResponse(res, {
+    statusCode: StatusCodes.OK,
+    success: true,
+    message: 'Reviews fetched successfully',
+    data: result.data,
+    pagination: result.pagination,
+  });
+});
+
+// get all reviews
+const getAllReviews = catchAsync(async (req: Request, res: Response) => {
+  const result = await ReviewServices.getAllReviews(req.query);
+
+  sendResponse(res, {
+    statusCode: StatusCodes.OK,
+    success: true,
+    message: 'Reviews fetched successfully',
+    data: result.data,
+    pagination: result.pagination,
+  });
+});
+
 export const ReviewController = {
   createReview,
   updateReview,
+  getSingleReview,
+  getMyReviews,
+  getAllReviews,
 };

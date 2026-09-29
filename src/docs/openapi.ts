@@ -19,6 +19,7 @@ import { registerChairRentalDocs } from '../app/modules/chairRental/chairRental.
 import { registerCategoryDocs } from '../app/modules/category/category.doc';
 import { registerServiceDocs } from '../app/modules/service/service.doc';
 import { registerAppointmentDocs } from '../app/modules/appointment/appointment.doc';
+import { registerReviewDocs } from '../app/modules/review/review.doc';
 
 export const registry = new OpenAPIRegistry();
 
@@ -40,6 +41,7 @@ export function generateOpenApiDocumentV1() {
   registerCategoryDocs();
   registerServiceDocs();
   registerAppointmentDocs();
+  registerReviewDocs();
   registerChatDocs();
   registerMessageDocs();
   registerDisclaimerDocs();

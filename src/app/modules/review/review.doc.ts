@@ -7,12 +7,23 @@ export function registerReviewDocs() {
   };
 
   // create review
-  // registerReview({
-  //   method: 'post',
-  //   path: '/review/create',
-  //   summary: 'Create review',
-  //   roles: ['Admin', 'SuperAdmin'],
-  //   body: ReviewValidations.createReviewValidation.shape.body,
-  //   isAuth: true,
-  // });
+  registerReview({
+    method: 'post',
+    path: '/reviews/create',
+    summary: 'Create review',
+    roles: ['Customer', 'Professional'],
+    body: ReviewValidations.createReviewValidation.shape.body,
+    isAuth: true,
+  });
+
+  // update review
+  registerReview({
+    method: 'patch',
+    path: '/reviews/:id',
+    summary: 'Update review',
+    roles: ['Customer', 'Professional'],
+    params: ReviewValidations.updateReviewValidation.shape.params,
+    body: ReviewValidations.updateReviewValidation.shape.body,
+    isAuth: true,
+  });
 }

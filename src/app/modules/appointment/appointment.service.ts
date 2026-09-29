@@ -6,6 +6,9 @@ import { Appointment } from './appointment.model';
 import { ChairRental } from '../chairRental/chairRental.model';
 import { RentalStatus } from '../chairRental/chairRental.constants';
 import { Service } from '../service/service.model';
+import QueryBuilder from '../../builder/QueryBuilder';
+import { JwtPayload } from 'jsonwebtoken';
+import { UserRole } from '../user/user.constant';
 
 // ---------------- create appointment ----------------
 const createAppointment = async (
@@ -96,7 +99,88 @@ const updateAppointment = async (
   return result;
 };
 
+// ---------------- get single appointment ----------------
+const getSingleAppointment = async (id: string) => {
+  const result = await Appointment.findById(id)
+    .populate('customer', 'firstName lastName role email phone image')
+    .populate('professional', 'firstName lastName role image email phone')
+    .populate('salon', 'name businessType bio logo email phone')
+    .populate('services', 'name category priceInUSD durationInMinutes');
+
+  if (!result) {
+    throw new ApiError(StatusCodes.NOT_FOUND, 'Appointment not found');
+  }
+  return result;
+};
+
+// ---------------- get my appointments ----------------
+const getMyAppointments = async (
+  user: JwtPayload,
+  query: Record<string, unknown>,
+) => {
+  const filter = { isDeleted: false } as any;
+  if (user.role === UserRole.Customer) {
+    filter.customer = user.id;
+  } else if (user.role === UserRole.Professional) {
+    filter.professional = user.id;
+  }
+
+  const aptQuery = new QueryBuilder(Appointment.find(filter), query)
+    .filter()
+    .sort()
+    .paginate()
+    .fields();
+
+  const [data, pagination] = await Promise.all([
+    aptQuery.modelQuery
+      .populate('customer', 'firstName lastName role email phone image')
+      .populate('professional', 'firstName lastName role image email phone')
+      .populate('salon', 'name businessType bio logo email phone')
+      .populate('services', 'name category priceInUSD durationInMinutes')
+      .lean(),
+    aptQuery.getPaginationInfo(),
+  ]);
+
+  return { data, pagination };
+};
+
+// ---------------- get all appointments ----------------
+const getAllAppointments = async (query: Record<string, unknown>) => {
+  const filter = { isDeleted: false } as any;
+  // search on customer
+  if (query.searchTerm) {
+    const customers = await User.find({
+      $or: [
+        { firstName: { $regex: query.searchTerm, $options: 'i' } },
+        { lastName: { $regex: query.searchTerm, $options: 'i' } },
+        { email: { $regex: query.searchTerm, $options: 'i' } },
+      ],
+    });
+    filter.customer = customers.map(customer => customer._id);
+  }
+
+  const aptQuery = new QueryBuilder(Appointment.find(filter), query)
+    .filter()
+    .sort()
+    .paginate()
+    .fields();
+
+  const [data, pagination] = await Promise.all([
+    aptQuery.modelQuery
+      .populate('customer', 'firstName lastName role email phone image')
+      .populate('professional', 'firstName lastName role image email phone')
+      .populate('salon', 'name businessType bio logo email phone')
+      .lean(),
+    aptQuery.getPaginationInfo(),
+  ]);
+
+  return { data, pagination };
+};
+
 export const AppointmentServices = {
   createAppointment,
   updateAppointment,
+  getSingleAppointment,
+  getMyAppointments,
+  getAllAppointments,
 };

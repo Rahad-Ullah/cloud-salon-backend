@@ -20,10 +20,10 @@ const PricingSchema = new Schema<AppointmentPricing>(
 const appointmentSchema = new Schema<IAppointment, AppointmentModel>(
   {
     uid: { type: String, unique: true, trim: true, sparse: true },
-    customer: { type: Schema.Types.ObjectId, ref: 'Customer', required: true },
+    customer: { type: Schema.Types.ObjectId, ref: 'User', required: true },
     professional: {
       type: Schema.Types.ObjectId,
-      ref: 'Professional',
+      ref: 'User',
       required: true,
     },
     salon: { type: Schema.Types.ObjectId, ref: 'Salon', required: true },

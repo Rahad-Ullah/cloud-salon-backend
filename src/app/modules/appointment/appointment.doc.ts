@@ -28,4 +28,31 @@ export function registerAppointmentDocs() {
     body: AppointmentValidations.updateAppointmentValidation.shape.body,
     isAuth: true,
   });
+
+  // get single appointment
+  registerAppointment({
+    method: 'get',
+    path: '/appointments/single/:id',
+    summary: 'Get single appointment',
+    params: AppointmentValidations.getAppointmentByIdValidation.shape.params,
+    isAuth: true,
+  });
+
+  // get my appointments
+  registerAppointment({
+    method: 'get',
+    path: '/appointments/me',
+    summary: 'Get my appointments',
+    roles: ['Customer', 'Professional'],
+    isAuth: true,
+  });
+
+  // get all appointments
+  registerAppointment({
+    method: 'get',
+    path: '/appointments',
+    summary: 'Get all appointments',
+    roles: ['Admin', 'SuperAdmin'],
+    isAuth: true,
+  });
 }

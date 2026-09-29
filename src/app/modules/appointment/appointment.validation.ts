@@ -4,31 +4,35 @@ import { objectId } from '../../../shared/objectIdValidator';
 
 const pricingValidationSchema = z.object({
   subtotal: z.number().nonnegative(),
-  discount: z.number().nonnegative().default(0),
+  discount: z.number().nonnegative().default(0).optional(),
   total: z.number().nonnegative(),
-  currency: z.string().trim().default('USD'),
+  currency: z.string().trim().default('USD').optional(),
 });
 
 const createAppointmentValidation = z.object({
-  body: z.object({
-    professional: objectId('Professional ID'),
-    services: z
-      .array(objectId('Service ID'))
-      .nonempty('At least one service is required'),
-    scheduledAt: z.string().datetime(),
-    pricing: pricingValidationSchema,
-  }),
+  body: z
+    .object({
+      professional: objectId('Professional ID'),
+      services: z
+        .array(objectId('Service ID'))
+        .nonempty('At least one service is required'),
+      scheduledAt: z.string().datetime(),
+      pricing: pricingValidationSchema,
+    })
+    .strict(),
 });
 
 const updateAppointmentValidation = z.object({
   params: z.object({
     id: objectId('Appointment ID'),
   }),
-  body: z.object({
-    status: z
-      .enum([AppointmentStatus.Confirmed, AppointmentStatus.Cancelled])
-      .optional(),
-  }),
+  body: z
+    .object({
+      status: z
+        .enum([AppointmentStatus.Confirmed, AppointmentStatus.Cancelled])
+        .optional(),
+    })
+    .strict(),
 });
 
 const deleteAppointmentValidation = z.object({

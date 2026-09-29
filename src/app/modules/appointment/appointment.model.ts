@@ -5,6 +5,7 @@ import {
   AppointmentPricing,
 } from './appointment.interface';
 import { AppointmentStatus, PaymentStatus } from './appointment.constants';
+import { autoIncrementPlugin } from '../../../DB/autoIncrementPlugin';
 
 const PricingSchema = new Schema<AppointmentPricing>(
   {
@@ -51,6 +52,14 @@ const appointmentSchema = new Schema<IAppointment, AppointmentModel>(
     timestamps: true,
   },
 );
+
+// auto increment uid
+appointmentSchema.plugin(autoIncrementPlugin, {
+  incField: 'uid',
+  prefix: 'APT',
+  counterId: 'appointment_sequence',
+  padLength: 6,
+});
 
 export const Appointment = model<IAppointment, AppointmentModel>(
   'Appointment',

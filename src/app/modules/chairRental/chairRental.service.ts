@@ -9,13 +9,13 @@ import { redlock } from '../../../config/redlock';
 import QueryBuilder from '../../builder/QueryBuilder';
 import { Salon } from '../salon/salon.model';
 import { Professional } from '../professional/professional.model';
+import { errorLogger } from '../../../shared/logger';
 
 const MS_PER_DAY = 86_400_000;
 const PAYMENT_HOLD_MINUTES = 15;
 
 // ------------------ create chairRental ------------------
 const createChairRental = async (payload: IChairRental) => {
-
   const startDate = new Date(payload.startDate);
   const endDate = new Date(payload.endDate);
 
@@ -71,7 +71,6 @@ const createChairRental = async (payload: IChairRental) => {
 
     // 4. Check for overlapping rentals (Confirmed OR active pending holds)
     const existingRental = await ChairRental.exists({
-      
       chair: payload.chair,
       isDeleted: false,
       status: {
@@ -109,7 +108,11 @@ const createChairRental = async (payload: IChairRental) => {
     result = await ChairRental.create(rentalData);
   } finally {
     // 6. Always release lock immediately after write
-    await lock.unlock();
+    try {
+      await redlock.release(lock);
+    } catch (err) {
+      errorLogger.error('Failed to release redlock:', err);
+    }
   }
 
   // TODO: 7. Initiate payment intent/gateway after lock is released

@@ -1,9 +1,7 @@
 export enum TransactionReferenceType {
-    Ride = 'Ride',
-    Listing = 'Listing',
-    Reservation = 'Reservation',
-    Consultation = 'Consultation',
-    Wallet = 'Wallet',
+    Appointment = 'appointment',
+    ChairRental = 'chair_rental',
+    Wallet = 'wallet',
 }
 
 export enum TransactionGateway {

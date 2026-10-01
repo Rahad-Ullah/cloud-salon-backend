@@ -104,6 +104,12 @@ const refundStripePayment = async ({
   }
 };
 
+// ------------- create transaction ----------------
+const createTransaction = async (payload: ITransaction) => {
+  const result = await Transaction.create(payload);
+  return result;
+};
+
 // ------------- update transaction status ----------------
 const updateTransactionStatus = async (
   id: string,
@@ -185,7 +191,9 @@ const getAllTransactions = async (query: Record<string, unknown>) => {
     .fields();
 
   const [data, pagination] = await Promise.all([
-    transactionQuery.modelQuery.populate('user').populate('reference.id'),
+    transactionQuery.modelQuery
+      .populate('user', 'firstName lastName role email phone image status uid')
+      .populate('reference.id'),
     transactionQuery.getPaginationInfo(),
   ]);
 
@@ -195,6 +203,7 @@ const getAllTransactions = async (query: Record<string, unknown>) => {
 export const TransactionServices = {
   createStripeCheckoutSession,
   refundStripePayment,
+  createTransaction,
   updateTransactionStatus,
   getSingleTransaction,
   getTransactionsByUserId,

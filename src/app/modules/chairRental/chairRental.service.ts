@@ -10,6 +10,14 @@ import QueryBuilder from '../../builder/QueryBuilder';
 import { Salon } from '../salon/salon.model';
 import { Professional } from '../professional/professional.model';
 import { errorLogger } from '../../../shared/logger';
+import { TransactionServices } from '../transaction/transaction.service';
+import {
+  TransactionReferenceType,
+  TransactionType,
+} from '../transaction/transaction.constants';
+import { User } from '../user/user.model';
+import { Transaction } from '../transaction/transaction.model';
+import { Types } from 'mongoose';
 
 const MS_PER_DAY = 86_400_000;
 const PAYMENT_HOLD_MINUTES = 15;
@@ -45,6 +53,14 @@ const createChairRental = async (payload: IChairRental) => {
       StatusCodes.BAD_REQUEST,
       'Duration must be at least 1 day',
     );
+  }
+
+  // 1. Get professional
+  const professional = await User.findById(payload.professional)
+    .select('_id email')
+    .lean();
+  if (!professional) {
+    throw new ApiError(StatusCodes.NOT_FOUND, 'Professional not found');
   }
 
   // 2. Lock specifically for this chair to eliminate race conditions
@@ -115,10 +131,36 @@ const createChairRental = async (payload: IChairRental) => {
     }
   }
 
-  // TODO: 7. Initiate payment intent/gateway after lock is released
-  // const paymentIntent = await PaymentService.createSession(result);
+  // handle stripe payment
+  const paymentSession = await TransactionServices.createStripeCheckoutSession(
+    professional,
+    {
+      amount: result.pricing.total,
+      currency: 'USD',
+      reference: {
+        type: TransactionReferenceType.ChairRental,
+        id: result._id.toString(),
+      },
+    },
+  );
 
-  return result;
+  // create transaction
+  if (paymentSession.checkoutUrl) {
+    await Transaction.create({
+      user: professional._id,
+      reference: {
+        type: TransactionReferenceType.ChairRental,
+        id: result._id,
+      },
+      type: TransactionType.Payment,
+      gateway: paymentSession.gateway,
+      gatewayReferenceId: paymentSession.sessionId,
+      amount: result.pricing.total,
+      netAmount: result.pricing.total,
+    });
+  }
+
+  return paymentSession;
 };
 
 // ------------------ update chairRental ------------------

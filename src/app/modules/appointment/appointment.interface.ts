@@ -14,8 +14,10 @@ export interface IAppointment {
   customer: Types.ObjectId;
   professional: Types.ObjectId;
   salon: Types.ObjectId;
+  chair: Types.ObjectId;
   services: Types.ObjectId[];
-  scheduledAt: Date;
+  startsAt: Date;
+  endsAt: Date;
   totalDurationInMinutes: number;
   pricing: AppointmentPricing;
   paymentStatus: PaymentStatus;

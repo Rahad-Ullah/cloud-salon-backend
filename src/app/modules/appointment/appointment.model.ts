@@ -27,8 +27,10 @@ const appointmentSchema = new Schema<IAppointment, AppointmentModel>(
       required: true,
     },
     salon: { type: Schema.Types.ObjectId, ref: 'Salon', required: true },
+    chair: { type: Schema.Types.ObjectId, ref: 'Chair', required: true },
     services: [{ type: Schema.Types.ObjectId, ref: 'Service', required: true }],
-    scheduledAt: { type: Date, required: true },
+    startsAt: { type: Date, required: true },
+    endsAt: { type: Date, required: true },
     totalDurationInMinutes: { type: Number, required: true },
     pricing: { type: PricingSchema, required: true },
     paymentStatus: {

@@ -9,43 +9,55 @@ import { Service } from '../service/service.model';
 import QueryBuilder from '../../builder/QueryBuilder';
 import { JwtPayload } from 'jsonwebtoken';
 import { UserRole } from '../user/user.constant';
+import { redlock } from '../../../config/redlock';
+import { AppointmentStatus } from './appointment.constants';
+import { errorLogger } from '../../../shared/logger';
+import { TransactionServices } from '../transaction/transaction.service';
+import {
+  TransactionReferenceType,
+  TransactionType,
+} from '../transaction/transaction.constants';
+import { Transaction } from '../transaction/transaction.model';
 
 // ---------------- create appointment ----------------
-const createAppointment = async (
-  payload: IAppointment,
-): Promise<IAppointment> => {
-  // 1. Validate user and chair rental in parallel
-  const [professional, rental] = await Promise.all([
-    User.exists({ _id: payload.professional }),
-    ChairRental.findOne({
-      professional: payload.professional,
-      status: { $in: [RentalStatus.Active, RentalStatus.Confirmed] },
-      isDeleted: false,
-    }).lean(),
+const createAppointment = async (payload: IAppointment) => {
+  const startsAt = new Date(payload.startsAt);
+  if (isNaN(startsAt.getTime())) {
+    throw new ApiError(
+      StatusCodes.BAD_REQUEST,
+      'Invalid scheduled date format provided',
+    );
+  }
+
+  const now = new Date();
+  if (startsAt < now) {
+    throw new ApiError(
+      StatusCodes.BAD_REQUEST,
+      'Appointment date must be in the future',
+    );
+  }
+
+  // 1. Validate customer & professional
+  const [customer, professional] = await Promise.all([
+    User.findById(payload.customer).select('_id email').lean(),
+    User.findById(payload.professional).select('_id email').lean(),
   ]);
 
+  if (!customer) {
+    throw new ApiError(StatusCodes.NOT_FOUND, 'Customer not found');
+  }
   if (!professional) {
     throw new ApiError(StatusCodes.NOT_FOUND, 'Professional not found');
   }
 
-  if (!rental) {
-    throw new ApiError(
-      StatusCodes.NOT_FOUND,
-      'Professional has no active chair',
-    );
-  }
-
-  // 2. Validate schedule time
-  const scheduledAt = new Date(payload.scheduledAt);
-  if (scheduledAt < rental.startDate || scheduledAt > rental.endDate) {
+  // 2. Fetch services, calculate total duration & price
+  const uniqueServiceIds = [...new Set(payload.services.map(String))];
+  if (!uniqueServiceIds.length) {
     throw new ApiError(
       StatusCodes.BAD_REQUEST,
-      'Professional is not available at this time.',
+      'At least one service is required',
     );
   }
-
-  // 3. Single query: Fetch services, calculate total price and duration in-memory
-  const uniqueServiceIds = [...new Set(payload.services.map(String))];
 
   const services = await Service.find({
     _id: { $in: uniqueServiceIds },
@@ -58,30 +70,124 @@ const createAppointment = async (
     throw new ApiError(StatusCodes.BAD_REQUEST, 'Invalid service id provided');
   }
 
-  const { totalPrice, totalDurationInMinutes } = services.reduce(
+  const { subtotal, totalDurationInMinutes } = services.reduce(
     (acc, service) => {
-      acc.totalPrice += service.priceInUSD || 0;
+      acc.subtotal += service.priceInUSD || 0;
       acc.totalDurationInMinutes += service.durationInMinutes || 0;
       return acc;
     },
-    { totalPrice: 0, totalDurationInMinutes: 0 },
+    { subtotal: 0, totalDurationInMinutes: 0 },
   );
 
-  // 4. Inject metadata & pricing
-  payload.salon = rental.salon;
-  payload.totalDurationInMinutes = totalDurationInMinutes;
+  const endsAt = new Date(
+    startsAt.getTime() + totalDurationInMinutes * 60 * 1000,
+  );
 
-  const discount = payload.pricing?.discount || 0;
-  payload.pricing = {
-    subtotal: totalPrice,
-    discount,
-    total: totalPrice - discount,
-    currency: payload.pricing?.currency || 'USD',
-  };
+  // 3. Acquire distributed lock for the professional's schedule
+  const lockKey = `locks:appointment:professional:${payload.professional}`;
+  const lock = await redlock.acquire([lockKey], 3000); // 3s hold
 
-  return await Appointment.create(payload);
+  let result;
+  try {
+    // 4. Verify professional has an active/confirmed chair rental covering this full slot
+    const rental = await ChairRental.findOne({
+      professional: payload.professional,
+      status: { $in: [RentalStatus.Active, RentalStatus.Confirmed] },
+      isDeleted: false,
+      startDate: { $lte: startsAt },
+      endDate: { $gte: endsAt },
+    }).lean();
 
-  // TODO: handle payment initiate
+    if (!rental) {
+      throw new ApiError(
+        StatusCodes.BAD_REQUEST,
+        'Professional is not available at this scheduled time',
+      );
+    }
+
+    // 5. Check for overlapping appointments
+    const overlappingAppointment = await Appointment.exists({
+      professional: payload.professional,
+      isDeleted: false,
+      status: {
+        $in: [
+          AppointmentStatus.Pending,
+          AppointmentStatus.Confirmed,
+          AppointmentStatus.Active,
+        ],
+      },
+      startsAt: { $lt: endsAt },
+      endsAt: { $gt: startsAt },
+    });
+
+    if (overlappingAppointment) {
+      throw new ApiError(
+        StatusCodes.CONFLICT,
+        'Professional is already booked during this time. Please choose another time.',
+      );
+    }
+
+    // 6. Build appointment record with server-calculated totals
+    const discount = Math.max(0, payload.pricing?.discount || 0);
+    const total = Math.max(0, subtotal - discount);
+
+    const appointmentData: Partial<IAppointment> = {
+      ...payload,
+      customer: customer._id,
+      professional: professional._id,
+      chair: rental.chair,
+      salon: rental.salon,
+      startsAt: startsAt,
+      endsAt: endsAt,
+      totalDurationInMinutes,
+      pricing: {
+        subtotal,
+        discount,
+        total,
+        currency: 'USD',
+      },
+    };
+
+    [result] = await Appointment.create([appointmentData]);
+  } finally {
+    // 7. Always release lock
+    try {
+      await redlock.release(lock);
+    } catch (err) {
+      errorLogger.error('Failed to release redlock for appointment:', err);
+    }
+  }
+
+  // 8. Handle Stripe checkout session
+  const paymentSession = await TransactionServices.createStripeCheckoutSession(
+    customer,
+    {
+      amount: result.pricing.total,
+      currency: 'USD',
+      reference: {
+        type: TransactionReferenceType.Appointment,
+        id: result._id.toString(),
+      },
+    },
+  );
+
+  // 9. Create transaction record
+  if (paymentSession.checkoutUrl) {
+    await Transaction.create({
+      user: customer._id,
+      reference: {
+        type: TransactionReferenceType.Appointment,
+        id: result._id,
+      },
+      type: TransactionType.Payment,
+      gateway: paymentSession.gateway,
+      gatewayReferenceId: paymentSession.sessionId,
+      amount: result.pricing.total,
+      netAmount: result.pricing.total,
+    });
+  }
+
+  return paymentSession;
 };
 
 // ---------------- update appointment ----------------

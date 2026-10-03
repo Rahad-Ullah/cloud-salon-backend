@@ -16,7 +16,7 @@ const createAppointmentValidation = z.object({
       services: z
         .array(objectId('Service ID'))
         .nonempty('At least one service is required'),
-      scheduledAt: z.string().datetime(),
+      startsAt: z.string().datetime(),
       pricing: pricingValidationSchema,
     })
     .strict(),

@@ -15,6 +15,7 @@ import { Wallet } from '../../modules/wallet/wallet.model';
 import { sendNotifications } from '../../../helpers/notificationHelper';
 import { ChairRental } from '../../modules/chairRental/chairRental.model';
 import { PaymentStatus } from '../../modules/chairRental/chairRental.constants';
+import { Appointment } from '../../modules/appointment/appointment.model';
 
 // ----------------- on checkout session completed -----------------
 const onCheckoutSessionCompleted = async (event: Stripe.Event) => {
@@ -85,6 +86,12 @@ const onCheckoutSessionCompleted = async (event: Stripe.Event) => {
     switch (referenceType) {
       case TransactionReferenceType.ChairRental:
         await ChairRental.findByIdAndUpdate(referenceId, {
+          paymentStatus: isPaid ? PaymentStatus.Paid : PaymentStatus.Unpaid,
+          transaction: transaction._id,
+        });
+        break;
+      case TransactionReferenceType.Appointment:
+        await Appointment.findByIdAndUpdate(referenceId, {
           paymentStatus: isPaid ? PaymentStatus.Paid : PaymentStatus.Unpaid,
           transaction: transaction._id,
         });
@@ -169,6 +176,16 @@ const onAsyncPaymentFailed = async (event: Stripe.Event) => {
           paymentStatus: PaymentStatus.Unpaid,
           transaction: transaction._id,
         });
+        break;
+      case TransactionReferenceType.Appointment:
+        await Appointment.findByIdAndUpdate(referenceId, {
+          paymentStatus: PaymentStatus.Unpaid,
+          transaction: transaction._id,
+        });
+        break;
+      // add other reference types here..
+      default:
+        break;
     }
   } catch (error: any) {
     console.error(
@@ -247,6 +264,16 @@ const onCheckoutSessionExpired = async (event: Stripe.Event) => {
           paymentStatus: PaymentStatus.Unpaid,
           transaction: transaction._id,
         });
+        break;
+      case TransactionReferenceType.Appointment:
+        await Appointment.findByIdAndUpdate(referenceId, {
+          paymentStatus: PaymentStatus.Unpaid,
+          transaction: transaction._id,
+        });
+        break;
+      // add other reference types here..
+      default:
+        break;
     }
   } catch (error: any) {
     console.error(

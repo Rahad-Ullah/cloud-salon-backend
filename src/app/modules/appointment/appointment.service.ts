@@ -230,6 +230,7 @@ const updateAppointment = async (
       existingAppointment.transaction,
     ).select('_id isPaid gatewayReferenceId');
 
+    // refund the amount
     if (transaction?.isPaid) {
       await TransactionServices.refundStripePayment({
         paymentIntentId: transaction.gatewayReferenceId,

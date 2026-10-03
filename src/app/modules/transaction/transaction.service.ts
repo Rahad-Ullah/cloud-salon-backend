@@ -82,8 +82,8 @@ const refundStripePayment = async ({
     referenceType: TransactionReferenceType;
     referenceId: string;
     userId: string;
-    consumerId: string;
-    providerId: string;
+    consumerId?: string;
+    providerId?: string;
   };
 }) => {
   try {
@@ -107,7 +107,7 @@ const refundStripePayment = async ({
       referenceId: metadata?.referenceId,
       type: TransactionType.Refund,
       gateway: TransactionGateway.Stripe,
-      gatewayReferenceId: result.id,
+      gatewayReferenceId: paymentIntentId,
       amount: amount,
       netAmount: amount,
       currency: 'USD',

@@ -287,9 +287,16 @@ const onCheckoutSessionExpired = async (event: Stripe.Event) => {
 // ----------------- on refund success -----------------
 const onRefundSuccess = async (event: Stripe.Event) => {
   const charge = event.data.object as Stripe.Charge;
-  const paymentIntentId = charge.payment_intent as string;
+  const paymentIntentId =
+    typeof charge.payment_intent === 'string'
+      ? charge.payment_intent
+      : charge.payment_intent?.id;
 
-  const { userId, referenceType, transactionId } = charge.metadata || {};
+  const latestRefund = charge.refunds?.data?.[0];
+
+  // Metadata passed directly to stripe.refunds.create()
+  const refundMetadata = latestRefund?.metadata || {};
+  const { referenceType, referenceId, consumerId, providerId } = refundMetadata;
 
   if (!paymentIntentId) {
     console.error(
@@ -299,19 +306,13 @@ const onRefundSuccess = async (event: Stripe.Event) => {
   }
 
   try {
-    // 1. Find the original payment transaction
-    const transaction = await Transaction.findById(transactionId);
-
-    if (!transaction) {
-      console.error(
-        `[Stripe Webhook Error] Original transaction not found for payment_intent: ${paymentIntentId}`,
-      );
-      return;
-    }
-
     // 2. Update the transaction status and refund fields
-    const updatedTransaction = await Transaction.findByIdAndUpdate(
-      transaction._id,
+    const updatedTransaction = await Transaction.findOneAndUpdate(
+      {
+        type: TransactionType.Refund,
+        gateway: TransactionGateway.Stripe,
+        gatewayReferenceId: paymentIntentId,
+      },
       {
         $set: {
           status: TransactionStatus.Completed,
@@ -322,11 +323,32 @@ const onRefundSuccess = async (event: Stripe.Event) => {
       { new: true },
     );
 
+    if (!updatedTransaction) {
+      console.error(
+        `[Stripe Webhook Error] onRefundSuccess - Original transaction not found for payment_intent: ${paymentIntentId}`,
+      );
+      return;
+    }
+
     // 3. Reverse Fulfillment Logic (Release the held resource)
-    // todo: reverse fulfillment logic
+    switch (referenceType) {
+      case TransactionReferenceType.ChairRental:
+        await ChairRental.findByIdAndUpdate(referenceId, {
+          paymentStatus: PaymentStatus.Refunded,
+        });
+        break;
+      case TransactionReferenceType.Appointment:
+        await Appointment.findByIdAndUpdate(referenceId, {
+          paymentStatus: PaymentStatus.Paid,
+        });
+        break;
+      // add other reference types here..
+      default:
+        break;
+    }
 
     console.log(
-      `[Stripe Webhook Success][${event.type}] Transaction ${transaction._id} marked as ${updatedTransaction?.status}. Total refunded: ${updatedTransaction?.amount}.`,
+      `[Stripe Webhook Success][${event.type}] Transaction ${updatedTransaction._id} marked as ${updatedTransaction?.status}. Total refunded: ${updatedTransaction?.amount}.`,
     );
   } catch (error: any) {
     console.error(

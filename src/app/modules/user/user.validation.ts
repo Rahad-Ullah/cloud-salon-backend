@@ -96,8 +96,8 @@ const getAllUsersZodSchema = z.object({
     .object({
       searchTerm: z.string().optional(),
       status: z.nativeEnum(UserStatus).optional(),
-      page: z.number().optional(),
-      limit: z.number().optional(),
+      page: z.string().optional(),
+      limit: z.string().optional(),
     })
     .strict(),
 });

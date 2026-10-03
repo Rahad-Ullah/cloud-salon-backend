@@ -19,7 +19,7 @@ const createAppointment = async (
     User.exists({ _id: payload.professional }),
     ChairRental.findOne({
       professional: payload.professional,
-      status: RentalStatus.Active,
+      status: { $in: [RentalStatus.Active, RentalStatus.Confirmed] },
       isDeleted: false,
     }).lean(),
   ]);

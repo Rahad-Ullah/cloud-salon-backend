@@ -2,7 +2,7 @@ import { Request, Response } from 'express';
 import { stripe } from '../../../config/stripe';
 import config from '../../../config';
 import { stripeEventHandler } from './stripe.handler';
-import { Stripe } from 'stripe/cjs/stripe.core';
+import Stripe from 'stripe';
 
 export const stripeWebhookController = async (req: Request, res: Response) => {
   const sig = req.headers['stripe-signature'];

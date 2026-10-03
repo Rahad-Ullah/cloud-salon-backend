@@ -1,4 +1,4 @@
-import { Stripe } from 'stripe/cjs/stripe.core';
+import Stripe from 'stripe';
 import { Transaction } from '../../modules/transaction/transaction.model';
 import {
   TransactionGateway,
@@ -13,6 +13,8 @@ import {
 } from '../../modules/wallet/wallet.constants';
 import { Wallet } from '../../modules/wallet/wallet.model';
 import { sendNotifications } from '../../../helpers/notificationHelper';
+import { ChairRental } from '../../modules/chairRental/chairRental.model';
+import { PaymentStatus } from '../../modules/chairRental/chairRental.constants';
 
 // ----------------- on checkout session completed -----------------
 const onCheckoutSessionCompleted = async (event: Stripe.Event) => {
@@ -36,8 +38,8 @@ const onCheckoutSessionCompleted = async (event: Stripe.Event) => {
     ?.balance_transaction as Stripe.BalanceTransaction;
 
   // 3. Format financial data
-  const totalAmount = balanceTransaction.amount / 100;
-  const gatewayFee = balanceTransaction?.fee / 100 || 0;
+  const totalAmount = balanceTransaction.amount / 100; // cents -> dollars
+  const gatewayFee = balanceTransaction?.fee / 100 || 0; // cents -> dollars
   const platformFeePercentage = 0;
   const platformFee = (totalAmount * platformFeePercentage) / 100;
   const netAmount = totalAmount - platformFee;
@@ -48,6 +50,7 @@ const onCheckoutSessionCompleted = async (event: Stripe.Event) => {
     // 4. update the formal Transaction document inside your MongoDB ledger
     const transaction = await Transaction.findOneAndUpdate(
       {
+        user: userId,
         gateway: TransactionGateway.Stripe,
         gatewayReferenceId: session.id,
       },
@@ -78,8 +81,18 @@ const onCheckoutSessionCompleted = async (event: Stripe.Event) => {
       `[Stripe Webhook Success] Transaction logged successfully: ${transaction._id}`,
     );
 
-    // 5. Trigger Fulfiment Logic Below
-    // todo: trigger fulfillment logic based on referenceType
+    // 5. Trigger Fulfillment Logic Below based on referenceType
+    switch (referenceType) {
+      case TransactionReferenceType.ChairRental:
+        await ChairRental.findByIdAndUpdate(referenceId, {
+          paymentStatus: isPaid ? PaymentStatus.Paid : PaymentStatus.Unpaid,
+          transaction: transaction._id,
+        });
+        break;
+      // add other reference types here..
+      default:
+        break;
+    }
   } catch (error: any) {
     console.error(
       `[Database Error] Failed to log transaction for session ${session.id}:`,
@@ -117,6 +130,7 @@ const onAsyncPaymentFailed = async (event: Stripe.Event) => {
     // 2. Update or create the transaction document to mark it as Failed
     const transaction = await Transaction.findOneAndUpdate(
       {
+        user: userId,
         gateway: TransactionGateway.Stripe,
         gatewayReferenceId: paymentIntentId,
       },
@@ -149,7 +163,13 @@ const onAsyncPaymentFailed = async (event: Stripe.Event) => {
     );
 
     // 3. Reverse Fulfillment Logic (Release the held resource)
-    // todo: reverse fulfillment logic
+    switch (referenceType) {
+      case TransactionReferenceType.ChairRental:
+        await ChairRental.findByIdAndUpdate(referenceId, {
+          paymentStatus: PaymentStatus.Unpaid,
+          transaction: transaction._id,
+        });
+    }
   } catch (error: any) {
     console.error(
       `[Database Error] Failed to process payment failure for intent ${paymentIntentId}:`,
@@ -188,6 +208,7 @@ const onCheckoutSessionExpired = async (event: Stripe.Event) => {
     // 2. Update or create the transaction document to mark it as Failed
     const transaction = await Transaction.findOneAndUpdate(
       {
+        user: userId,
         gateway: TransactionGateway.Stripe,
         gatewayReferenceId: paymentIntentId,
       },
@@ -208,7 +229,7 @@ const onCheckoutSessionExpired = async (event: Stripe.Event) => {
           platformFee: platformFee,
           netAmount: netAmount,
           currency: session.currency?.toUpperCase() || 'USD',
-          status: TransactionStatus.Cancelled,
+          status: TransactionStatus.Failed,
           isPaid: false,
         },
       },
@@ -220,7 +241,13 @@ const onCheckoutSessionExpired = async (event: Stripe.Event) => {
     );
 
     // 3. Reverse Fulfillment Logic (Release the held resource)
-    // todo: reverse fulfillment logic
+    switch (referenceType) {
+      case TransactionReferenceType.ChairRental:
+        await ChairRental.findByIdAndUpdate(referenceId, {
+          paymentStatus: PaymentStatus.Unpaid,
+          transaction: transaction._id,
+        });
+    }
   } catch (error: any) {
     console.error(
       `[Database Error] Failed to process payment failure for intent ${paymentIntentId}:`,
@@ -329,7 +356,6 @@ const onRefundFailed = async (event: Stripe.Event) => {
     );
 
     // 4. Optionally: Alert admin to intervene manually
-
   } catch (error: any) {
     console.error(
       `[Database Error] Failed to process refund failure for payment_intent ${paymentIntentId}:`,

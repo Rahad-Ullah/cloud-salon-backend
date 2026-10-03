@@ -1,6 +1,6 @@
 import { StripeWebhookServices } from './stripe.service';
 import { StripeEvent as StripeEventModel } from '../../modules/stripeEvent/stripeEvent.model';
-import { Stripe } from 'stripe/cjs/stripe.core';
+import Stripe from 'stripe';
 
 export async function stripeEventHandler(event: Stripe.Event) {
   // Idempotency guard

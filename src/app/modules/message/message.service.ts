@@ -23,11 +23,15 @@ export const createMessage = async (payload: IMessage): Promise<IMessage> => {
   // mark sender as seen
   payload.seenBy = [payload.sender];
 
+  // create message
   const result = await Message.create(payload);
   const populatedResult = await result.populate(
     'sender',
     'firstName lastName image isDeleted',
   );
+
+  // update the chat to sort it to the top
+  await Chat.findByIdAndUpdate(payload.chat, { lastMessage: result._id });
 
   // emit socket event for new message
   //@ts-ignore
@@ -41,9 +45,6 @@ export const createMessage = async (payload: IMessage): Promise<IMessage> => {
       io.to(`user:${userId.toString()}`).emit('getChatList', populatedResult);
     });
   }
-
-  // update the chat to sort it to the top
-  await Chat.findByIdAndUpdate(payload.chat, {});
 
   return result;
 };

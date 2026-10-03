@@ -10,7 +10,7 @@ import QueryBuilder from '../../builder/QueryBuilder';
 import { JwtPayload } from 'jsonwebtoken';
 import { UserRole } from '../user/user.constant';
 import { redlock } from '../../../config/redlock';
-import { AppointmentStatus } from './appointment.constants';
+import { AppointmentStatus, PaymentStatus } from './appointment.constants';
 import { errorLogger } from '../../../shared/logger';
 import { TransactionServices } from '../transaction/transaction.service';
 import {
@@ -187,6 +187,8 @@ const createAppointment = async (payload: IAppointment) => {
     });
   }
 
+  // todo: 10. Push bullmq job to queue
+
   return paymentSession;
 };
 
@@ -194,14 +196,56 @@ const createAppointment = async (payload: IAppointment) => {
 const updateAppointment = async (
   id: string,
   payload: Partial<IAppointment>,
+  user: JwtPayload,
 ) => {
+  // check if the appointment exists
+  const existingAppointment = await Appointment.findOne({
+    _id: id,
+    isDeleted: false,
+  });
+  if (!existingAppointment) {
+    throw new ApiError(StatusCodes.NOT_FOUND, 'Appointment not found');
+  }
+
   const result = await Appointment.findByIdAndUpdate(id, payload, {
     new: true,
   });
   if (!result) {
-    throw new ApiError(StatusCodes.NOT_FOUND, 'Appointment not found');
+    throw new ApiError(StatusCodes.NOT_FOUND, 'Failed to update appointment');
   }
-  // TODO: handle payment on cancel/refund
+
+  // handle payment on cancel/reject
+  if (
+    payload.status !== existingAppointment.status &&
+    (payload.status === AppointmentStatus.Rejected ||
+      payload.status === AppointmentStatus.Cancelled) &&
+    existingAppointment.paymentStatus === PaymentStatus.Paid &&
+    existingAppointment.transaction
+  ) {
+    // calculate refund amount
+    let refundAmount = result.pricing.total;
+
+    // get the transaction record
+    const transaction = await Transaction.findById(
+      existingAppointment.transaction,
+    ).select('_id isPaid gatewayReferenceId');
+
+    if (transaction?.isPaid) {
+      await TransactionServices.refundStripePayment({
+        paymentIntentId: transaction.gatewayReferenceId,
+        amount: refundAmount,
+        reason: 'requested_by_customer',
+        metadata: {
+          referenceType: TransactionReferenceType.Appointment,
+          referenceId: existingAppointment._id.toString(),
+          userId: user.id,
+          consumerId: existingAppointment.customer.toString(),
+          providerId: existingAppointment.professional.toString(),
+        },
+      });
+    }
+  }
+
   return result;
 };
 

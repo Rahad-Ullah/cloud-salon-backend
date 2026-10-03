@@ -6,6 +6,7 @@ import {
   TransactionStatus,
   TransactionReferenceType,
   TransactionGateway,
+  TransactionType,
 } from './transaction.constants';
 import config from '../../../config';
 import QueryBuilder from '../../builder/QueryBuilder';
@@ -78,17 +79,18 @@ const refundStripePayment = async ({
   amount: number;
   reason?: 'duplicate' | 'fraudulent' | 'requested_by_customer';
   metadata?: {
-    userId: string;
     referenceType: TransactionReferenceType;
     referenceId: string;
-    transactionId: string;
+    userId: string;
+    consumerId: string;
+    providerId: string;
   };
 }) => {
   try {
     const result = await stripe.refunds.create(
       {
         payment_intent: paymentIntentId,
-        amount,
+        amount: Math.round(amount * 100),
         reason,
         metadata,
       },
@@ -97,6 +99,20 @@ const refundStripePayment = async ({
         idempotencyKey: `refund_${paymentIntentId}_${amount}`,
       },
     );
+
+    // create transaction for refund
+    await Transaction.create({
+      user: metadata?.userId,
+      referenceType: metadata?.referenceType,
+      referenceId: metadata?.referenceId,
+      type: TransactionType.Refund,
+      gateway: TransactionGateway.Stripe,
+      gatewayReferenceId: result.id,
+      amount: amount,
+      netAmount: amount,
+      currency: 'USD',
+    });
+
     return result;
   } catch (error: any) {
     console.error('Stripe API Error on refund:', error);

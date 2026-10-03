@@ -49,6 +49,7 @@ const transactionSchema = new Schema<ITransaction, TransactionModel>(
     },
     paymentMethod: {
       type: String,
+      default: ''
     },
     amount: {
       type: Number,
@@ -56,15 +57,19 @@ const transactionSchema = new Schema<ITransaction, TransactionModel>(
     },
     gatewayFee: {
       type: Number,
+      default: 0,
     },
     platformFeePercentage: {
       type: Number,
+      default: 0,
     },
     platformFee: {
       type: Number,
+      default: 0,
     },
     netAmount: {
       type: Number,
+      default: 0,
     },
     currency: {
       type: String,
@@ -81,6 +86,7 @@ const transactionSchema = new Schema<ITransaction, TransactionModel>(
     },
     paidAt: {
       type: Date,
+      default: null,
     },
   },
   { timestamps: true },

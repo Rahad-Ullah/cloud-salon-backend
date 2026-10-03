@@ -29,7 +29,11 @@ const updateAppointmentValidation = z.object({
   body: z
     .object({
       status: z
-        .enum([AppointmentStatus.Confirmed, AppointmentStatus.Cancelled])
+        .enum([
+          AppointmentStatus.Confirmed,
+          AppointmentStatus.Cancelled,
+          AppointmentStatus.Rejected,
+        ])
         .optional(),
     })
     .strict(),

@@ -7,6 +7,7 @@ import {
   SalonModel,
 } from './salon.interface';
 import { autoIncrementPlugin } from '../../../DB/autoIncrementPlugin';
+import { SalonStatus } from './salon.constants';
 
 const availabilitySchema = new Schema<ISalonAvailability>(
   {
@@ -63,6 +64,12 @@ const salonSchema = new Schema<ISalon, SalonModel>(
     location: { type: pointSchema, required: true },
     totalReviews: { type: Number, default: 0, min: 0 },
     avgRating: { type: Number, default: 0, min: 0, max: 5 },
+    status: {
+      type: String,
+      enum: Object.values(SalonStatus),
+      default: SalonStatus.Active,
+    },
+    isDeleted: { type: Boolean, default: false },
     createdBy: { type: Schema.Types.ObjectId, ref: 'User', required: true },
   },
   {

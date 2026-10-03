@@ -1,4 +1,5 @@
 import { Model, Types } from 'mongoose';
+import { SalonStatus } from './salon.constants';
 
 export interface ISalonAvailability {
   day: string; // e.g., 'Monday'
@@ -38,6 +39,8 @@ export interface ISalon {
   location: ISalonGeoLocation;
   totalReviews: number;
   avgRating: number;
+  status: SalonStatus;
+  isDeleted: boolean;
   createdBy: Types.ObjectId;
   createdAt: Date;
   updatedAt: Date;

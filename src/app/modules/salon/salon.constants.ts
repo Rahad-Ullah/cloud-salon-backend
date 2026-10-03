@@ -1,1 +1,5 @@
-export const SALON_CONSTANT = 'someValue';
+export enum SalonStatus {
+  Active = 'active',
+  Inactive = 'inactive',
+  Suspended = 'suspended',
+}

@@ -52,6 +52,7 @@ const onCheckoutSessionCompleted = async (event: Stripe.Event) => {
     const transaction = await Transaction.findOneAndUpdate(
       {
         user: userId,
+        type: TransactionType.Payment,
         gateway: TransactionGateway.Stripe,
         gatewayReferenceId: session.id,
       },
@@ -138,8 +139,9 @@ const onAsyncPaymentFailed = async (event: Stripe.Event) => {
     const transaction = await Transaction.findOneAndUpdate(
       {
         user: userId,
+        type: TransactionType.Payment,
         gateway: TransactionGateway.Stripe,
-        gatewayReferenceId: paymentIntentId,
+        gatewayReferenceId: session.id,
       },
       {
         $set: {
@@ -226,8 +228,9 @@ const onCheckoutSessionExpired = async (event: Stripe.Event) => {
     const transaction = await Transaction.findOneAndUpdate(
       {
         user: userId,
+        type: TransactionType.Payment,
         gateway: TransactionGateway.Stripe,
-        gatewayReferenceId: paymentIntentId,
+        gatewayReferenceId: session.id,
       },
       {
         $set: {
@@ -365,11 +368,11 @@ const onRefundFailed = async (event: Stripe.Event) => {
   const refund = event.data.object as Stripe.Refund;
   const paymentIntentId = refund.payment_intent as string;
 
-  const { transactionId } = refund.metadata || {};
+  const { referenceType, referenceId } = refund.metadata || {};
 
   if (!paymentIntentId) {
     console.error(
-      `[Stripe Webhook Error] Missing payment_intent in failed refund: ${refund.id}`,
+      `[Stripe Webhook Error] onRefundFailed - Missing payment_intent in failed refund: ${refund.id}`,
     );
     return;
   }
@@ -378,19 +381,13 @@ const onRefundFailed = async (event: Stripe.Event) => {
   const failureReason = refund.failure_reason || 'Unknown reason';
 
   try {
-    // 2. Find the original payment transaction
-    const transaction = await Transaction.exists({ _id: transactionId });
-
-    if (!transaction) {
-      console.error(
-        `[Stripe Webhook Error] Original transaction not found for payment_intent: ${paymentIntentId}`,
-      );
-      return;
-    }
-
-    // 3. Update transaction status to reflect the refund failure
-    await Transaction.findByIdAndUpdate(
-      transaction._id,
+    // 2. Find the original payment transaction and update
+    await Transaction.findOneAndUpdate(
+      {
+        type: TransactionType.Refund,
+        gateway: TransactionGateway.Stripe,
+        gatewayReferenceId: paymentIntentId,
+      },
       {
         $set: {
           status: TransactionStatus.Failed,
@@ -401,7 +398,7 @@ const onRefundFailed = async (event: Stripe.Event) => {
     );
 
     console.error(
-      `[Stripe Webhook Alert][${event.type}] Refund ${refund.id} FAILED for transaction ${transaction._id}. Reason: ${failureReason}`,
+      `[Stripe Webhook Alert][${event.type}] Refund FAILED for payment_intent ${paymentIntentId}. Reference type: ${referenceType}, Reference ID: ${referenceId}. Reason: ${failureReason}`,
     );
 
     // 4. Optionally: Alert admin to intervene manually

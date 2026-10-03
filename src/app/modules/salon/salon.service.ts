@@ -117,6 +117,30 @@ const updateSalon = async (
   return result;
 };
 
+// ---------------- update status -----------------
+const updateStatus = async (id: string, payload: Partial<ISalon>) => {
+  const result = await Salon.findByIdAndUpdate(id, payload, { new: true });
+  if (!result) {
+    throw new ApiError(StatusCodes.NOT_FOUND, 'Salon not found');
+  }
+  return result;
+};
+
+// ---------------- delete salon ---------------
+const deleteSalon = async (id: string) => {
+  const result = await Salon.findByIdAndUpdate(
+    id,
+    { isDeleted: true },
+    {
+      new: true,
+    },
+  );
+  if (!result) {
+    throw new ApiError(StatusCodes.NOT_FOUND, 'Salon not found');
+  }
+  return result;
+};
+
 // ---------------- get single salon ---------------
 const getSingleSalon = async (id: string) => {
   const result = await Salon.findById(id).populate(
@@ -131,7 +155,10 @@ const getSingleSalon = async (id: string) => {
 
 // ---------------- get my salon ---------------
 const getMySalon = async (userId: string) => {
-  const result = await Salon.findOne({ createdBy: userId }).populate(
+  const result = await Salon.findOne({
+    createdBy: userId,
+    isDeleted: false,
+  }).populate(
     'createdBy',
     'firstName lastName email role phone image isSalonOwner',
   );
@@ -143,7 +170,7 @@ const getMySalon = async (userId: string) => {
 
 // ---------------- get all salons ---------------
 const getAllSalons = async (query: Record<string, unknown>) => {
-  const salonQuery = new QueryBuilder(Salon.find(), query)
+  const salonQuery = new QueryBuilder(Salon.find({ isDeleted: false }), query)
     .search(['name businessType'])
     .filter()
     .sort()
@@ -166,6 +193,8 @@ const getAllSalons = async (query: Record<string, unknown>) => {
 export const SalonServices = {
   createSalon,
   updateSalon,
+  updateStatus,
+  deleteSalon,
   getSingleSalon,
   getMySalon,
   getAllSalons,

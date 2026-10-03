@@ -23,6 +23,22 @@ router.patch(
   SalonController.updateSalon,
 );
 
+// update status
+router.patch(
+  '/:id/status',
+  auth(UserRole.Admin, UserRole.SuperAdmin),
+  validateRequest(SalonValidations.updateSalonStatusValidation),
+  SalonController.updateStatus,
+);
+
+// delete salon
+router.delete(
+  '/:id',
+  auth(UserRole.Admin, UserRole.SuperAdmin),
+  validateRequest(SalonValidations.deleteSalonValidation),
+  SalonController.deleteSalon,
+);
+
 // get my salon
 router.get(
   '/my-salon',

@@ -35,6 +35,30 @@ const updateSalon = catchAsync(async (req: Request, res: Response) => {
   });
 });
 
+// update status
+const updateStatus = catchAsync(async (req: Request, res: Response) => {
+  const result = await SalonServices.updateStatus(req.params.id, req.body);
+
+  sendResponse(res, {
+    success: true,
+    statusCode: StatusCodes.OK,
+    message: 'Status updated successfully',
+    data: result,
+  });
+});
+
+// delete salon
+const deleteSalon = catchAsync(async (req: Request, res: Response) => {
+  const result = await SalonServices.deleteSalon(req.params.id);
+
+  sendResponse(res, {
+    success: true,
+    statusCode: StatusCodes.OK,
+    message: 'Salon deleted successfully',
+    data: result,
+  });
+});
+
 // get single salon
 const getSingleSalon = catchAsync(async (req: Request, res: Response) => {
   const result = await SalonServices.getSingleSalon(req.params.id);
@@ -75,6 +99,8 @@ const getAllSalons = catchAsync(async (req: Request, res: Response) => {
 export const SalonController = {
   createSalon,
   updateSalon,
+  updateStatus,
+  deleteSalon,
   getSingleSalon,
   getMySalon,
   getAllSalons,

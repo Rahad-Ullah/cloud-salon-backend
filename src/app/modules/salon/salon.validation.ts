@@ -1,5 +1,6 @@
 import { z } from 'zod';
 import { objectId } from '../../../shared/objectIdValidator';
+import { SalonStatus } from './salon.constants';
 
 const availabilityValidationSchema = z.object({
   day: z.string({ required_error: 'Day is required' }),
@@ -68,6 +69,15 @@ const updateSalonValidation = z.object({
   }),
 });
 
+const updateSalonStatusValidation = z.object({
+  params: z.object({
+    id: objectId('Salon ID'),
+  }),
+  body: z.object({
+    status: z.nativeEnum(SalonStatus).optional(),
+  }),
+});
+
 const deleteSalonValidation = z.object({
   params: z.object({
     id: objectId('Salon ID'),
@@ -92,6 +102,7 @@ const getAllSalonsValidation = z.object({
 export const SalonValidations = {
   createSalonValidation,
   updateSalonValidation,
+  updateSalonStatusValidation,
   deleteSalonValidation,
   getSalonByIdValidation,
   getAllSalonsValidation,

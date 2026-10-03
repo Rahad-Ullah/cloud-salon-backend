@@ -27,6 +27,27 @@ export function registerSalonDocs() {
     isAuth: true,
   });
 
+  // update status
+  registerSalon({
+    method: 'patch',
+    path: '/salons/:id/status',
+    summary: 'Update salon status',
+    roles: ['Admin', 'SuperAdmin'],
+    params: SalonValidations.updateSalonStatusValidation.shape.params,
+    body: SalonValidations.updateSalonStatusValidation.shape.body,
+    isAuth: true,
+  });
+
+  // delete salon
+  registerSalon({
+    method: 'delete',
+    path: '/salons/:id',
+    summary: 'Delete salon',
+    roles: ['Admin', 'SuperAdmin'],
+    params: SalonValidations.deleteSalonValidation.shape.params,
+    isAuth: true,
+  });
+
   // get my salon
   registerSalon({
     method: 'get',

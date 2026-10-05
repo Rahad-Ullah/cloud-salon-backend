@@ -45,6 +45,7 @@ const getAllActiveProfessionalsValidation = z.object({
       latitude: z.string().optional(),
       longitude: z.string().optional(),
       distance: z.string().optional(),
+      professional: objectId('Professional ID').optional(),
       salon: objectId('Salon ID').optional(),
       page: z.string().optional(),
       limit: z.string().optional(),

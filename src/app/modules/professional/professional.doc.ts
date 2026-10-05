@@ -17,4 +17,12 @@ export function registerProfessionalDocs() {
     body: ProfessionalValidations.updateProfessionalValidation.shape.body,
     isAuth: true,
   });
+
+  // get active professionals
+  registerProfessional({
+    method: 'get',
+    path: '/professionals/active',
+    summary: 'Get active professionals',
+    isAuth: false,
+  });
 }

@@ -294,23 +294,30 @@ const getActiveRentals = async (query: Record<string, unknown>) => {
   }
 
   // filter salon by distance
-  if (query.distance) {
-    const distanceInKm = Number(query.distance);
-    filter.salon = await Salon.find({
-      location: {
-        $near: {
-          $geometry: {
-            type: 'Point',
-            coordinates: [query.longitude, query.latitude],
+  if (query.distance && query.latitude && query.longitude) {
+    const distanceInKm = Number(query.distance) || 20;
+    const latitude = Number(query.latitude);
+    const longitude = Number(query.longitude);
+    if (!isNaN(distanceInKm) && !isNaN(latitude) && !isNaN(longitude)) {
+      filter.salon = await Salon.find({
+        location: {
+          $near: {
+            $geometry: {
+              type: 'Point',
+              coordinates: [longitude, latitude],
+            },
+            $maxDistance: distanceInKm * 1000,
           },
-          $maxDistance: distanceInKm * 1000,
         },
-      },
-    });
+      });
+    }
   }
 
-  const rentalQuery = new QueryBuilder(ChairRental.find(filter), query)
-    .filter(['salon', 'professional', 'distance', 'latitude', 'longitude'])
+  const rentalQuery = new QueryBuilder(
+    ChairRental.find(filter).select('professional salon'),
+    query,
+  )
+    .filter(['distance', 'latitude', 'longitude'])
     .sort()
     .paginate()
     .fields();

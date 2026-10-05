@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { objectId } from '../../../shared/objectIdValidator';
 
 // update professional validation
 const updateProfessionalValidation = z.object({
@@ -36,7 +37,23 @@ const updateVerificationValidation = z.object({
     .strict(),
 });
 
+// get all active professionals validation
+const getAllActiveProfessionalsValidation = z.object({
+  query: z
+    .object({
+      searchTerm: z.string().optional(),
+      latitude: z.string().optional(),
+      longitude: z.string().optional(),
+      distance: z.string().optional(),
+      salon: objectId('Salon ID').optional(),
+      page: z.string().optional(),
+      limit: z.string().optional(),
+    })
+    .strict(),
+});
+
 export const ProfessionalValidations = {
   updateProfessionalValidation,
   updateVerificationValidation,
+  getAllActiveProfessionalsValidation,
 };

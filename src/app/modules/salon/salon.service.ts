@@ -171,7 +171,7 @@ const getMySalon = async (userId: string) => {
 // ---------------- get all salons ---------------
 const getAllSalons = async (query: Record<string, unknown>) => {
   const salonQuery = new QueryBuilder(Salon.find({ isDeleted: false }), query)
-    .search(['name businessType'])
+    .search(['name', 'businessType'])
     .filter()
     .sort()
     .paginate()

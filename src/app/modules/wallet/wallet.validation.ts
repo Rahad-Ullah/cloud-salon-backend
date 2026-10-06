@@ -11,30 +11,6 @@ export const connectPayoutMethod = z.object({
       }),
       gatewayBankInfo: z
         .object({
-          [PayoutProvider.CHAPA]: z
-            .object({
-              accountName: z
-                .string({
-                  required_error: 'Legal bank account name is required',
-                })
-                .trim()
-                .min(1),
-              accountNumber: z
-                .string({
-                  required_error:
-                    'Bank account or mobile wallet number is required',
-                })
-                .trim()
-                .min(1),
-              bankCode: z
-                .string({
-                  required_error: 'Bank routing identifier code is required',
-                })
-                .trim()
-                .min(1),
-              bankName: z.string({ required_error: 'Bank name is required' }).trim().min(1),
-            })
-            .optional(),
           [PayoutProvider.STRIPE]: z
             .object({
               bankName: z.string().trim().optional(),
@@ -58,29 +34,20 @@ export const connectPayoutMethod = z.object({
           });
         }
       }
-
-      if (currency === SupportedCurrency.ETB) {
-        if (!gatewayBankInfo[PayoutProvider.CHAPA]) {
-          ctx.addIssue({
-            code: z.ZodIssueCode.custom,
-            message:
-              'Chapa bank routing and account information block is missing.',
-            path: ['body', 'gatewayBankInfo', PayoutProvider.CHAPA],
-          });
-        }
-      }
     }),
 });
 
 // 2. PAYOUT WITHDRAWAL REQUEST SCHEMA
 // Validates the payload when a host requests to cash out their available funds.
 export const payoutWithdrawal = z.object({
-  body: z.object({
-    amount: z
-      .number({ required_error: 'Withdrawal amount is required' })
-      .int('Amount must be an integer.')
-      .positive('Withdrawal amount must be greater than 0.'),
-  }),
+  body: z
+    .object({
+      amount: z
+        .number({ required_error: 'Withdrawal amount is required' })
+        .int('Amount must be an integer.')
+        .positive('Withdrawal amount must be greater than 0.'),
+    })
+    .strict(),
 });
 
 export const WalletValidations = {

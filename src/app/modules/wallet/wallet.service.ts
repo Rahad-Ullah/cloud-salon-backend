@@ -49,31 +49,19 @@ const connectPayoutMethodService = async (payload: IWallet) => {
     onboardingUrl = accountLink.url;
 
     payload.gatewayBankInfo = {
-      ...payload.gatewayBankInfo,
+      ...gatewayBankInfo,
       [PayoutProvider.STRIPE]: { stripeAccountId },
     };
   }
 
-  // CHAPA DIRECT TRANSFER SETUP
-  if (provider === PayoutProvider.CHAPA) {
-    const payloadChapaInfo = gatewayBankInfo?.[PayoutProvider.CHAPA];
-
-    if (!payloadChapaInfo) {
-      throw new ApiError(
-        StatusCodes.BAD_REQUEST,
-        'Chapa bank routing and account information is missing.',
-      );
-    }
-  }
+  //? more providers to be added here
 
   // LOGICAL DATABASE ATOMIC UPDATE
   const providerBankData = payload.gatewayBankInfo?.[provider];
   const updateQuery: Record<string, any> = {
     provider,
-    status:
-      provider === PayoutProvider.CHAPA
-        ? WalletStatus.ACTIVE
-        : WalletStatus.PENDING_ONBOARDING,
+    currency,
+    status: WalletStatus.PENDING_ONBOARDING,
   };
 
   if (providerBankData) {
@@ -122,7 +110,7 @@ const payoutMoneyService = async (userId: string, amountUSD: number) => {
   }
 
   // check gateway provider and payout
-  const txnId = `ZILA_PAYOUT-${wallet._id}-${Date.now()}`;
+  const txnId = `SALON_PAYOUT-${wallet._id}-${Date.now()}`;
   if (wallet.provider === PayoutProvider.STRIPE) {
     // check stripe balance
     const balance = await stripe.balance.retrieve();

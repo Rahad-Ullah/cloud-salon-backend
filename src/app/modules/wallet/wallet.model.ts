@@ -7,16 +7,6 @@ import {
   WalletStatus,
 } from './wallet.constants';
 
-const chapaPayoutDetailsSchema = new Schema(
-  {
-    accountName: { type: String, required: true, trim: true },
-    accountNumber: { type: String, required: true, trim: true },
-    bankCode: { type: String, required: true, trim: true },
-    bankName: { type: String, trim: true },
-  },
-  { _id: false },
-);
-
 const stripePayoutDetailsSchema = new Schema(
   {
     stripeAccountId: { type: String, required: true, trim: true },
@@ -52,38 +42,6 @@ const walletSchema = new Schema<IWallet, WalletModel>(
       type: String,
       enum: Object.values(PayoutProvider),
       default: null,
-      //   validate: {
-      //     validator: function (value: PayoutProvider) {
-      //   const queryContext = this as any;
-
-      //   // Check if getUpdate exists (it will during findOneAndUpdate)
-      //   if (typeof queryContext.getUpdate === 'function') {
-      //     const update = queryContext.getUpdate();
-      //     const currentUpdateData = update?.$set || update;
-      //     const currency = currentUpdateData?.currency;
-
-      //     if (currency === SupportedCurrency.USD) {
-      //       return value === PayoutProvider.STRIPE;
-      //     }
-      //     if (currency === SupportedCurrency.ETB) {
-      //       return value === PayoutProvider.CHAPA;
-      //     }
-      //     return false;
-      //   }
-
-      //   // Fallback for regular .save() invocations where 'this' actually is the document
-      //   const docContext = this as any;
-      //   if (docContext.currency === SupportedCurrency.USD) {
-      //     return value === PayoutProvider.STRIPE;
-      //   }
-      //   if (docContext.currency === SupportedCurrency.ETB) {
-      //     return value === PayoutProvider.CHAPA;
-      //   }
-      //   return false;
-      // },
-      //     message:
-      //       'Currency/Provider mismatch! STRIPE requires USD and CHAPA requires ETB.',
-      //   },
     },
     currency: {
       type: String,
@@ -102,10 +60,6 @@ const walletSchema = new Schema<IWallet, WalletModel>(
     },
     gatewayBankInfo: {
       type: {
-        [PayoutProvider.CHAPA]: {
-          type: chapaPayoutDetailsSchema,
-          required: false,
-        },
         [PayoutProvider.STRIPE]: {
           type: stripePayoutDetailsSchema,
           required: false,

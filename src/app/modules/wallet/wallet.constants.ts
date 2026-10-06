@@ -1,11 +1,11 @@
 export enum PayoutProvider {
   STRIPE = 'stripe',
-  CHAPA = 'chapa',
+  // more providers to be added
 }
 
 export enum SupportedCurrency {
-  ETB = 'ETB',
   USD = 'USD',
+  // more currencies to be added
 }
 
 export enum WalletStatus {

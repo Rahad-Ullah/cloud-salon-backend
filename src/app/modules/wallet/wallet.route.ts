@@ -24,10 +24,6 @@ router.post(
 );
 
 // get my wallet
-router.get(
-  '/my-wallet',
-  auth(UserRole.Professional),
-  WalletController.getMyWallet,
-);
+router.get('/me', auth(UserRole.Professional), WalletController.getMyWallet);
 
 export const walletRoutes = router;

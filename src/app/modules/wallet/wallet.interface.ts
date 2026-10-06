@@ -5,13 +5,6 @@ import {
   WalletStatus,
 } from './wallet.constants';
 
-export interface IChapaPayoutDetails {
-  accountName: string;
-  accountNumber: string;
-  bankCode: string;
-  bankName?: string;
-}
-
 export interface IStripePayoutDetails {
   stripeAccountId: string;
   bankName?: string;
@@ -31,8 +24,8 @@ export interface IWallet {
   pendingBalance: number;
 
   gatewayBankInfo: {
-    [PayoutProvider.CHAPA]?: IChapaPayoutDetails;
     [PayoutProvider.STRIPE]?: IStripePayoutDetails;
+    // more providers to be added
   } | null;
 
   createdAt: Date;

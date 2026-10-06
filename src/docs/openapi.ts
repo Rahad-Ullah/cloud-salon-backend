@@ -21,6 +21,7 @@ import { registerServiceDocs } from '../app/modules/service/service.doc';
 import { registerAppointmentDocs } from '../app/modules/appointment/appointment.doc';
 import { registerReviewDocs } from '../app/modules/review/review.doc';
 import { registerTransactionDocs } from '../app/modules/transaction/transaction.doc';
+import { registerWishlistDocs } from '../app/modules/wishlist/wishlist.doc';
 
 export const registry = new OpenAPIRegistry();
 
@@ -43,6 +44,7 @@ export function generateOpenApiDocumentV1() {
   registerServiceDocs();
   registerAppointmentDocs();
   registerReviewDocs();
+  registerWishlistDocs();
   registerTransactionDocs();
   registerChatDocs();
   registerMessageDocs();

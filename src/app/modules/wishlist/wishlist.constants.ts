@@ -1,4 +1,4 @@
 export enum WishlistEntityType {
-  Professional = 'professional',
+  Professional = 'user',
   Salon = 'salon',
 }

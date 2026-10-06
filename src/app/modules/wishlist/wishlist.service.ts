@@ -3,9 +3,26 @@ import ApiError from '../../../errors/ApiError';
 import { IWishlist } from './wishlist.interface';
 import { Wishlist } from './wishlist.model';
 import QueryBuilder from '../../builder/QueryBuilder';
+import { WishlistEntityType } from './wishlist.constants';
+import { Salon } from '../salon/salon.model';
+import { User } from '../user/user.model';
 
 // --------------- toggle wishlist ---------------
 const toggleWishlist = async (payload: IWishlist) => {
+  // check if the entity exists
+  if (payload.entityType === WishlistEntityType.Salon) {
+    const salon = await Salon.exists({ _id: payload.entity });
+    if (!salon) {
+      throw new ApiError(StatusCodes.NOT_FOUND, 'Entity not found');
+    }
+  } else if (payload.entityType === WishlistEntityType.Professional) {
+    const professional = await User.exists({ _id: payload.entity });
+    if (!professional) {
+      throw new ApiError(StatusCodes.NOT_FOUND, 'Entity not found');
+    }
+  }
+
+  // check if wishlist already exists
   const isExist = await Wishlist.exists({
     user: payload.user,
     entityType: payload.entityType,
@@ -34,7 +51,13 @@ const deleteWishlist = async (id: string) => {
 
 // --------------- get wishlist by id ---------------
 const getWishlistById = async (id: string) => {
-  const result = await Wishlist.findById(id).populate('entity');
+  const result = await Wishlist.findById(id).populate({
+    path: 'entity',
+    populate: {
+      path: 'roleRef',
+      strictPopulate: false,
+    },
+  });
   if (!result) {
     throw new ApiError(StatusCodes.NOT_FOUND, 'Wishlist not found');
   }
@@ -53,7 +76,15 @@ const getWishlistsByUserId = async (
     .fields();
 
   const [data, pagination] = await Promise.all([
-    wishlistQuery.modelQuery.populate('entity').lean(),
+    wishlistQuery.modelQuery
+      .populate({
+        path: 'entity',
+        populate: {
+          path: 'roleRef',
+          strictPopulate: false,
+        },
+      })
+      .lean(),
     wishlistQuery.getPaginationInfo(),
   ]);
 

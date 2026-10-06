@@ -86,7 +86,7 @@ const getAllCategories = async (query: Record<string, unknown>) => {
     .fields();
 
   const [data, pagination] = await Promise.all([
-    categoryQuery.modelQuery.lean(),
+    categoryQuery.modelQuery.populate('totalServices').lean(),
     categoryQuery.getPaginationInfo(),
   ]);
 

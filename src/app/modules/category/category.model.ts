@@ -18,6 +18,15 @@ const categorySchema = new Schema<ICategory, CategoryModel>({
   },
 });
 
+// virtual for total services count
+categorySchema.virtual('totalServices', {
+  ref: 'Service',
+  localField: '_id',
+  foreignField: 'category',
+  count: true,
+  match: { isDeleted: false },
+});
+
 export const Category = model<ICategory, CategoryModel>(
   'Category',
   categorySchema,

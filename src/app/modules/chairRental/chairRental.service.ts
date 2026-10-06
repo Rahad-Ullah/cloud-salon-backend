@@ -206,7 +206,18 @@ const getRentalsByProfessionalId = async (
   professionalId: string,
   query: Record<string, unknown>,
 ) => {
-  const filter = { professional: professionalId, isDeleted: false } as any;
+  const filter = { isDeleted: false } as any;
+
+  // check if the professional has a salon
+  const salon = await Salon.findOne({
+    createdBy: professionalId,
+    isDeleted: false,
+  }).select('_id');
+  if (salon) {
+    filter.salon = salon._id;
+  } else {
+    filter.professional = professionalId;
+  }
 
   // pre-filter salon
   if (query.searchTerm) {

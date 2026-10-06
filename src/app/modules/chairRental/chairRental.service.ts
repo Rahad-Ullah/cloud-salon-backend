@@ -17,6 +17,9 @@ import {
 } from '../transaction/transaction.constants';
 import { User } from '../user/user.model';
 import { Transaction } from '../transaction/transaction.model';
+import { Wishlist } from '../wishlist/wishlist.model';
+import { Types } from 'mongoose';
+import { WishlistEntityType } from '../wishlist/wishlist.constants';
 
 const MS_PER_DAY = 86_400_000;
 
@@ -302,7 +305,10 @@ const getActiveRentals = async (query: Record<string, unknown>) => {
     const professionals = await Professional.find({
       $or: [{ title: { $regex: query.searchTerm, $options: 'i' } }],
     });
-    filter.professional = professionals.map(professional => professional.user);
+    // Use $in to match any of the resolved professional IDs
+    filter.professional = {
+      $in: professionals.map(p => p.user),
+    };
   }
 
   // filter salon by distance
@@ -311,7 +317,7 @@ const getActiveRentals = async (query: Record<string, unknown>) => {
     const latitude = Number(query.latitude);
     const longitude = Number(query.longitude);
     if (!isNaN(distanceInKm) && !isNaN(latitude) && !isNaN(longitude)) {
-      filter.salon = await Salon.find({
+      const nearbySalons = await Salon.find({
         location: {
           $near: {
             $geometry: {
@@ -321,7 +327,9 @@ const getActiveRentals = async (query: Record<string, unknown>) => {
             $maxDistance: distanceInKm * 1000,
           },
         },
-      });
+      }).select('_id');
+
+      filter.salon = { $in: nearbySalons.map(s => s._id) };
     }
   }
 
@@ -331,12 +339,12 @@ const getActiveRentals = async (query: Record<string, unknown>) => {
     ),
     query,
   )
-    .filter(['distance', 'latitude', 'longitude'])
+    .filter(['distance', 'latitude', 'longitude', 'user'])
     .sort()
     .paginate()
     .fields();
 
-  const [data, pagination] = await Promise.all([
+  const [rentals, pagination] = await Promise.all([
     rentalQuery.modelQuery
       .populate({ path: 'professional', populate: 'roleRef' })
       .populate('salon')
@@ -344,9 +352,51 @@ const getActiveRentals = async (query: Record<string, unknown>) => {
     rentalQuery.getPaginationInfo(),
   ]);
 
+  // If no user is logged in, attach isWishlist: false to all professionals
+  const userId = query.user;
+  if (!userId) {
+    const data = rentals.map((rental: any) => ({
+      ...rental,
+      professional: rental.professional
+        ? { ...rental.professional, isWishlist: false }
+        : null,
+    }));
+    return { data, pagination };
+  }
+
+  // Collect professional IDs from the paginated result
+  const professionalIds = rentals
+    .map((rental: any) => rental.professional?._id)
+    .filter(Boolean);
+
+  // Fetch wishlists for the current user matching these professionals
+  const wishlists = await Wishlist.find({
+    user: new Types.ObjectId(userId as string),
+    entityType: WishlistEntityType.Professional,
+    entity: { $in: professionalIds },
+  })
+    .select('entity')
+    .lean();
+
+  const wishlistSet = new Set(wishlists.map(w => w.entity.toString()));
+
+  // Map isWishlist onto the professional object (or the rental item)
+  const data = rentals.map((rental: any) => {
+    if (!rental.professional) return rental;
+
+    const isWishlist = wishlistSet.has(rental.professional._id.toString());
+
+    return {
+      ...rental,
+      professional: {
+        ...rental.professional,
+        isWishlist,
+      },
+    };
+  });
+
   return { data, pagination };
 };
-
 export const ChairRentalServices = {
   createChairRental,
   updateChairRental,

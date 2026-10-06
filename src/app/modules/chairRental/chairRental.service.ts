@@ -17,10 +17,8 @@ import {
 } from '../transaction/transaction.constants';
 import { User } from '../user/user.model';
 import { Transaction } from '../transaction/transaction.model';
-import { Types } from 'mongoose';
 
 const MS_PER_DAY = 86_400_000;
-const PAYMENT_HOLD_MINUTES = 15;
 
 // ------------------ create chairRental ------------------
 const createChairRental = async (payload: IChairRental) => {
@@ -294,7 +292,10 @@ const getAllRentals = async (query: Record<string, unknown>) => {
 
 // ---------------- get active rentals ----------------
 const getActiveRentals = async (query: Record<string, unknown>) => {
-  const filter = { status: RentalStatus.Active, isDeleted: false } as any;
+  const filter = {
+    status: { $in: [RentalStatus.Active, RentalStatus.Confirmed] },
+    isDeleted: false,
+  } as any;
 
   // pre-filter professional searching
   if (query.searchTerm) {
@@ -325,7 +326,9 @@ const getActiveRentals = async (query: Record<string, unknown>) => {
   }
 
   const rentalQuery = new QueryBuilder(
-    ChairRental.find(filter).select('professional salon'),
+    ChairRental.find(filter).select(
+      'professional salon chair startDate endDate status',
+    ),
     query,
   )
     .filter(['distance', 'latitude', 'longitude'])

@@ -6,9 +6,7 @@ import { PayoutProvider, SupportedCurrency } from './wallet.constants';
 export const connectPayoutMethod = z.object({
   body: z
     .object({
-      currency: z.nativeEnum(SupportedCurrency, {
-        required_error: 'Currency is required (USD or ETB)',
-      }),
+      currency: z.nativeEnum(SupportedCurrency),
       gatewayBankInfo: z
         .object({
           [PayoutProvider.STRIPE]: z

@@ -9,32 +9,32 @@ const router = express.Router();
 
 // update transaction status
 router.patch(
-    '/:id',
-    auth(UserRole.Admin, UserRole.SuperAdmin),
-    validateRequest(TransactionValidations.updateTransactionStatusValidation),
-    TransactionController.updateTransactionStatus,
+  '/:id',
+  auth(UserRole.Admin, UserRole.SuperAdmin),
+  validateRequest(TransactionValidations.updateTransactionStatusValidation),
+  TransactionController.updateTransactionStatus,
 );
 
 // get single transaction
 router.get(
-    '/single/:id',
-    auth(),
-    validateRequest(TransactionValidations.getSingleTransactionValidation),
-    TransactionController.getSingleTransaction,
+  '/single/:id',
+  auth(),
+  validateRequest(TransactionValidations.getSingleTransactionValidation),
+  TransactionController.getSingleTransaction,
 );
 
 // get my transactions
 router.get(
-  '/my-transactions',
+  '/me',
   auth(UserRole.Professional),
   TransactionController.getMyTransactions,
 );
 
 // get all transactions
 router.get(
-    '/',
-    auth(UserRole.Admin, UserRole.SuperAdmin),
-    TransactionController.getAllTransactions,
+  '/',
+  auth(UserRole.Admin, UserRole.SuperAdmin),
+  TransactionController.getAllTransactions,
 );
 
 export const transactionRoutes = router;

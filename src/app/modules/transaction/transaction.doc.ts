@@ -5,7 +5,7 @@ export function registerTransactionDocs() {
   const registerTransaction = (
     opts: Parameters<typeof registerApiRoute>[0],
   ) => {
-    registerApiRoute({ tags: ['Support'], ...opts });
+    registerApiRoute({ tags: ['Transaction'], ...opts });
   };
 
   // update transaction status

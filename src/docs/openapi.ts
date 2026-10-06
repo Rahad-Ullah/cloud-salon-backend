@@ -23,6 +23,7 @@ import { registerReviewDocs } from '../app/modules/review/review.doc';
 import { registerTransactionDocs } from '../app/modules/transaction/transaction.doc';
 import { registerWishlistDocs } from '../app/modules/wishlist/wishlist.doc';
 import { registerWalletDocs } from '../app/modules/wallet/wallet.doc';
+import { registerSettingDocs } from '../app/modules/setting/setting.doc';
 
 export const registry = new OpenAPIRegistry();
 
@@ -54,6 +55,7 @@ export function generateOpenApiDocumentV1() {
   registerFaqDocs();
   registerNotificationDocs();
   registerSupportDocs();
+  registerSettingDocs();
 
   const generator = new OpenApiGeneratorV3(registry.definitions);
 

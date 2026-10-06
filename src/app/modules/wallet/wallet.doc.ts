@@ -3,7 +3,7 @@ import { WalletValidations } from './wallet.validation';
 
 export function registerWalletDocs() {
   const registerWallet = (opts: Parameters<typeof registerApiRoute>[0]) => {
-    registerApiRoute({ tags: ['Wishlist'], ...opts });
+    registerApiRoute({ tags: ['Wallet'], ...opts });
   };
 
   // payout method connect

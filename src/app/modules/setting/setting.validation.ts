@@ -4,6 +4,7 @@ import { z } from 'zod';
 const updateSettingValidation = z.object({
   body: z
     .object({
+      platformFeePercentage: z.number().optional(),
       contactInfo: z
         .object({
           email: z.string().email().optional(),

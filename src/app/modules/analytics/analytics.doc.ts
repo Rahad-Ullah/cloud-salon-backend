@@ -22,4 +22,22 @@ export function registerAnalyticsDocs() {
     roles: ['Professional'],
     isAuth: true,
   });
+
+  // get admin overview
+  registerAnalytics({
+    method: 'get',
+    path: '/analytics/overview/admin',
+    summary: 'Get admin overview',
+    roles: ['Admin', 'SuperAdmin'],
+    isAuth: true,
+  });
+
+  // get user growth
+  registerAnalytics({
+    method: 'get',
+    path: '/analytics/user-growth',
+    summary: 'Get user growth',
+    roles: ['Admin', 'SuperAdmin'],
+    isAuth: true,
+  });
 }

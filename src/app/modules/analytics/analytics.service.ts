@@ -6,6 +6,7 @@ import { Review } from '../review/review.model';
 import { Wishlist } from '../wishlist/wishlist.model';
 import { Types } from 'mongoose';
 import { EntityType } from '../review/review.constants';
+import { Salon } from '../salon/salon.model';
 
 const MONTH_NAMES = [
   'Jan',
@@ -149,24 +150,54 @@ const getProfessionalOverview = async (userId: string) => {
 
 // ---------------- admin dashboard overview -----------------
 const getAdminOverview = async () => {
-  const [totalUsers, totalMerchants] = await Promise.all([
-    User.countDocuments({ role: UserRole.Customer, isDeleted: false }),
-    User.countDocuments({ role: UserRole.Professional, isDeleted: false }),
-  ]);
+  const [userRoleCounts, totalSalons, totalAppointments, totalReviews] =
+    await Promise.all([
+      User.aggregate([
+        {
+          $match: {
+            role: { $in: [UserRole.Customer, UserRole.Professional] },
+            isDeleted: false,
+          },
+        },
+        {
+          $group: {
+            _id: '$role',
+            count: { $sum: 1 },
+          },
+        },
+      ]),
+      Salon.countDocuments({ isDeleted: false }),
+      Appointment.countDocuments({ isDeleted: false }),
+      Review.countDocuments({ isDeleted: false }),
+    ]);
+
+  const roleMap = new Map<string, number>();
+  for (const item of userRoleCounts) {
+    roleMap.set(item._id, item.count);
+  }
 
   return {
-    totalUsers,
-    totalMerchants,
+    totalCustomers: roleMap.get(UserRole.Customer) ?? 0,
+    totalProfessionals: roleMap.get(UserRole.Professional) ?? 0,
+    totalSalons,
+    totalAppointments,
+    totalReviews,
   };
 };
 
 // ---------------- get monthly user growth ----------------
-const getUserGrowth = async (query: Record<string, unknown>) => {
+const getUserGrowth = async (query: Record<string, unknown> = {}) => {
+  const parsedYear = Number(query.year);
   const targetYear =
-    parseInt(query?.year as string, 10) || new Date().getFullYear();
+    Number.isInteger(parsedYear) && parsedYear > 1970 && parsedYear < 3000
+      ? parsedYear
+      : new Date().getUTCFullYear();
 
-  const startDate = new Date(`${targetYear}-01-01T00:00:00.000Z`);
-  const endDate = new Date(`${targetYear + 1}-01-01T00:00:00.000Z`);
+  const timezone = typeof query.timezone === 'string' ? query.timezone : 'UTC';
+
+  // Explicit UTC boundary dates
+  const startDate = new Date(Date.UTC(targetYear, 0, 1, 0, 0, 0));
+  const endDate = new Date(Date.UTC(targetYear + 1, 0, 1, 0, 0, 0));
 
   const aggregateResult = await User.aggregate<{ _id: number; count: number }>([
     {
@@ -175,53 +206,38 @@ const getUserGrowth = async (query: Record<string, unknown>) => {
           $gte: startDate,
           $lt: endDate,
         },
+        isDeleted: false,
       },
     },
     {
       $group: {
-        _id: { $month: '$createdAt' }, // Group strictly by month (1-12)
+        _id: {
+          $month: {
+            date: '$createdAt',
+            timezone: timezone, // Keeps month boundaries accurate to local time
+          },
+        },
         count: { $sum: 1 },
       },
     },
   ]);
 
-  // Create a fast lookup map: { monthNumber: count }
-  const countsByMonth = aggregateResult.reduce<Record<number, number>>(
-    (acc, item) => {
-      acc[item._id] = item.count;
-      return acc;
-    },
-    {},
-  );
+  // Fast lookup map
+  const countsByMonth = new Map<number, number>();
+  for (const item of aggregateResult) {
+    countsByMonth.set(item._id, item.count);
+  }
 
-  // Month names for clean reporting
-  const monthNames = [
-    'Jan',
-    'Feb',
-    'Mar',
-    'Apr',
-    'May',
-    'Jun',
-    'Jul',
-    'Aug',
-    'Sep',
-    'Oct',
-    'Nov',
-    'Dec',
-  ];
-
-  // Fill in all 12 months (guaranteeing complete data)
-  const formattedResult = Array.from({ length: 12 }, (_, index) => {
-    const monthNumber = index + 1; // 1 to 12
+  // Guarantee continuous 12-month series
+  return MONTH_NAMES.map((monthName, index) => {
+    const monthNumber = index + 1;
     return {
       year: targetYear,
       month: monthNumber,
-      monthName: monthNames[index],
-      count: countsByMonth[monthNumber] || 0,
+      monthName,
+      count: countsByMonth.get(monthNumber) ?? 0,
     };
   });
-
-  return formattedResult;
 };
 
 export const AnalyticsServices = {

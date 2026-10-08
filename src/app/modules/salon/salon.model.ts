@@ -77,6 +77,9 @@ const salonSchema = new Schema<ISalon, SalonModel>(
   },
 );
 
+// index for faster queries
+salonSchema.index({ isDeleted: 1 });
+
 // 2dsphere index for geospatial queries
 salonSchema.index({ location: '2dsphere' });
 

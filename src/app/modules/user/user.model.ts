@@ -146,6 +146,9 @@ const userSchema = new Schema<IUser, UserModal>(
   { timestamps: true },
 );
 
+// index for faster query
+userSchema.index({ role: 1, isDeleted: 1 });
+
 // 2dsphere index for geospatial queries
 userSchema.index({ location: '2dsphere' });
 

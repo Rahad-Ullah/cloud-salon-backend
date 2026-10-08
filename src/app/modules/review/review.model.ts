@@ -41,7 +41,9 @@ const reviewSchema = new Schema<IReview, ReviewModel>(
   { timestamps: true },
 );
 
-// indexes
+// indexes for faster queries
+reviewSchema.index({ isDeleted: 1 });
+reviewSchema.index({ user: 1, isDeleted: 1 });
 reviewSchema.index({ entity: 1, entityType: 1, isDeleted: 1 });
 
 // virtual field

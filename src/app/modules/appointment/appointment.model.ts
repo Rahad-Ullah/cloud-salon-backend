@@ -55,6 +55,9 @@ const appointmentSchema = new Schema<IAppointment, AppointmentModel>(
   },
 );
 
+// index for faster query
+appointmentSchema.index({ isDeleted: 1 });
+
 // auto increment uid
 appointmentSchema.plugin(autoIncrementPlugin, {
   incField: 'uid',

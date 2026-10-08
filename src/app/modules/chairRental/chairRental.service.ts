@@ -316,10 +316,10 @@ const getActiveRentals = async (query: Record<string, unknown>) => {
   }
 
   // filter salon by distance
-  if (query.distance && query.latitude && query.longitude) {
-    const distanceInKm = Number(query.distance) || 20;
+  if (query.latitude && query.longitude) {
     const latitude = Number(query.latitude);
     const longitude = Number(query.longitude);
+    const distanceInKm = Number(query.distance) || 20;
     if (!isNaN(distanceInKm) && !isNaN(latitude) && !isNaN(longitude)) {
       const nearbySalons = await Salon.find({
         location: {

@@ -41,7 +41,7 @@ const updateVerificationValidation = z.object({
 const getAllActiveProfessionalsValidation = z.object({
   query: z
     .object({
-      searchTerm: z.string().optional(),
+      serviceCategory: objectId('Category ID').optional(),
       latitude: z.string().optional(),
       longitude: z.string().optional(),
       distance: z.string().optional(),

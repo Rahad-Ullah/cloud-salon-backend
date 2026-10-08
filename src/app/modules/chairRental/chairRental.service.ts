@@ -20,6 +20,8 @@ import { Transaction } from '../transaction/transaction.model';
 import { Wishlist } from '../wishlist/wishlist.model';
 import { Types } from 'mongoose';
 import { WishlistEntityType } from '../wishlist/wishlist.constants';
+import { Service } from '../service/service.model';
+import { ServiceStatus } from '../service/service.constants';
 
 const MS_PER_DAY = 86_400_000;
 
@@ -300,14 +302,16 @@ const getActiveRentals = async (query: Record<string, unknown>) => {
     isDeleted: false,
   } as any;
 
-  // pre-filter professional searching
-  if (query.searchTerm) {
-    const professionals = await Professional.find({
-      $or: [{ title: { $regex: query.searchTerm, $options: 'i' } }],
+  // pre-filter professional by category
+  if (query.serviceCategory) {
+    const professionalIds = await Service.distinct('createdBy', {
+      category: query.serviceCategory,
+      isDeleted: false,
+      status: ServiceStatus.Active,
     });
-    // Use $in to match any of the resolved professional IDs
+
     filter.professional = {
-      $in: professionals.map(p => p.user),
+      $in: professionalIds,
     };
   }
 
@@ -339,7 +343,7 @@ const getActiveRentals = async (query: Record<string, unknown>) => {
     ),
     query,
   )
-    .filter(['distance', 'latitude', 'longitude', 'user'])
+    .filter(['serviceCategory', 'distance', 'latitude', 'longitude', 'user'])
     .sort()
     .paginate()
     .fields();

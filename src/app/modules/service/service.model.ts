@@ -58,6 +58,7 @@ const serviceSchema = new Schema<IService, ServiceModel>(
 
 // index
 serviceSchema.index({ createdBy: 1, isDeleted: 1 });
+serviceSchema.index({ category: 1, isDeleted: 1, status: 1 });
 
 // auto increment uid
 serviceSchema.plugin(autoIncrementPlugin, {

@@ -24,6 +24,7 @@ import { registerTransactionDocs } from '../app/modules/transaction/transaction.
 import { registerWishlistDocs } from '../app/modules/wishlist/wishlist.doc';
 import { registerWalletDocs } from '../app/modules/wallet/wallet.doc';
 import { registerSettingDocs } from '../app/modules/setting/setting.doc';
+import { registerAnalyticsDocs } from '../app/modules/analytics/analytics.doc';
 
 export const registry = new OpenAPIRegistry();
 
@@ -49,6 +50,7 @@ export function generateOpenApiDocumentV1() {
   registerWishlistDocs();
   registerWalletDocs();
   registerTransactionDocs();
+  registerAnalyticsDocs();
   registerChatDocs();
   registerMessageDocs();
   registerDisclaimerDocs();

@@ -5,18 +5,18 @@ import { UserRole } from '../user/user.constant';
 
 const router = express.Router();
 
-// get user overview
+// get customer overview
 router.get(
-  '/overview/user',
+  '/overview/customer',
   auth(UserRole.Customer),
-  AnalyticsController.getUserOverview,
+  AnalyticsController.getCustomerOverview,
 );
 
 // get professional overview
 router.get(
   '/overview/professional',
   auth(UserRole.Professional),
-  AnalyticsController.getMerchantOverview,
+  AnalyticsController.getProfessionalOverview,
 );
 
 // get admin overview

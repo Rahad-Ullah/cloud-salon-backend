@@ -170,10 +170,35 @@ const getMySalon = async (userId: string) => {
 
 // ---------------- get all salons ---------------
 const getAllSalons = async (query: Record<string, unknown>) => {
-  const salonQuery = new QueryBuilder(Salon.find({ isDeleted: false }), query)
+  const filter: Record<string, unknown> = { isDeleted: false };
+
+  // 1. Geospatial Coordinates Filter (Radius search)
+  const latitude = Number(query.latitude);
+  const longitude = Number(query.longitude);
+  const distanceInKm = Number(query.distance) || 10; // Default: 10 km
+
+  if (!isNaN(latitude) && !isNaN(longitude)) {
+    // Earth's radius in kilometers is ~6378.1
+    // $centerSphere takes [ [lng, lat], radiusInRadians ]
+    const radiusInRadians = distanceInKm / 6378.1;
+
+    filter.location = {
+      $geoWithin: {
+        $centerSphere: [[longitude, latitude], radiusInRadians],
+      },
+    };
+  }
+
+  // 2. Optional: Text-based Location Filter (e.g., ?city=New York)
+  if (query.city && typeof query.city === 'string') {
+    filter['address.city'] = { $regex: query.city, $options: 'i' };
+    delete query.city;
+  }
+
+  const salonQuery = new QueryBuilder(Salon.find(filter), query)
     .search(['name', 'businessType'])
-    .filter()
-    .sort()
+    .filter(['latitude', 'longitude', 'distance', 'city'])
+    // .sort()
     .paginate()
     .fields();
 

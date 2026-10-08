@@ -94,6 +94,11 @@ const getAllSalonsValidation = z.object({
   query: z.object({
     searchTerm: z.string().optional(),
     businessType: z.string().optional(),
+    latitude: z.string().nonempty().optional(),
+    longitude: z.string().nonempty().optional(),
+    distance: z.string().optional(),
+    city: z.string().optional(),
+    status: z.nativeEnum(SalonStatus).optional(),
     page: z.string().optional(),
     limit: z.string().optional(),
   }),

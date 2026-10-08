@@ -7,6 +7,7 @@ import { Wishlist } from '../wishlist/wishlist.model';
 import { Types } from 'mongoose';
 import { EntityType } from '../review/review.constants';
 import { Salon } from '../salon/salon.model';
+import { redis } from '../../../config/redis';
 
 const MONTH_NAMES = [
   'Jan',
@@ -150,6 +151,16 @@ const getProfessionalOverview = async (userId: string) => {
 
 // ---------------- admin dashboard overview -----------------
 const getAdminOverview = async () => {
+  const ADMIN_OVERVIEW_CACHE_KEY = 'analytics:admin:overview';
+  const CACHE_TTL_SECONDS = 60 * 5; // 5 minutes
+
+  // 1. Check cache first
+  const cachedData = await redis.get(ADMIN_OVERVIEW_CACHE_KEY);
+  if (cachedData) {
+    return JSON.parse(cachedData);
+  }
+
+  // 2. Cache miss -> perform DB operations
   const [userRoleCounts, totalSalons, totalAppointments, totalReviews] =
     await Promise.all([
       User.aggregate([
@@ -176,13 +187,23 @@ const getAdminOverview = async () => {
     roleMap.set(item._id, item.count);
   }
 
-  return {
+  const result = {
     totalCustomers: roleMap.get(UserRole.Customer) ?? 0,
     totalProfessionals: roleMap.get(UserRole.Professional) ?? 0,
     totalSalons,
     totalAppointments,
     totalReviews,
   };
+
+  // 3. Save to cache
+  await redis.set(
+    ADMIN_OVERVIEW_CACHE_KEY,
+    JSON.stringify(result),
+    'EX',
+    CACHE_TTL_SECONDS,
+  );
+
+  return result;
 };
 
 // ---------------- get monthly user growth ----------------

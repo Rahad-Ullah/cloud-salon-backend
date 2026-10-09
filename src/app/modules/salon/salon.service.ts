@@ -3,12 +3,14 @@ import ApiError from '../../../errors/ApiError';
 import { ISalon } from './salon.interface';
 import { Salon } from './salon.model';
 import { User } from '../user/user.model';
-import mongoose from 'mongoose';
+import mongoose, { Types } from 'mongoose';
 import { MediaUploadServices } from '../mediaUpload/mediaUpload.service';
 import deleteS3File from '../../../shared/deleteS3File';
 import { errorLogger } from '../../../shared/logger';
 import { JwtPayload } from 'jsonwebtoken';
 import QueryBuilder from '../../builder/QueryBuilder';
+import { Wishlist } from '../wishlist/wishlist.model';
+import { WishlistEntityType } from '../wishlist/wishlist.constants';
 
 // --------------- create salon ---------------
 const createSalon = async (payload: ISalon): Promise<ISalon> => {
@@ -197,12 +199,12 @@ const getAllSalons = async (query: Record<string, unknown>) => {
 
   const salonQuery = new QueryBuilder(Salon.find(filter), query)
     .search(['name', 'businessType'])
-    .filter(['latitude', 'longitude', 'distance', 'city'])
+    .filter(['latitude', 'longitude', 'distance', 'city', 'user'])
     // .sort()
     .paginate()
     .fields();
 
-  const [data, pagination] = await Promise.all([
+  const [salons, pagination] = await Promise.all([
     salonQuery.modelQuery
       .populate(
         'createdBy',
@@ -211,6 +213,37 @@ const getAllSalons = async (query: Record<string, unknown>) => {
       .lean(),
     salonQuery.getPaginationInfo(),
   ]);
+
+  // If no user is logged in, attach isWishlist: false to all salons
+  const userId = query.user;
+  if (!userId) {
+    const data = salons.map((salon: any) => ({
+      ...salon,
+      isWishlist: false,
+    }));
+    return { data, pagination };
+  }
+
+  // Collect salon IDs from the paginated result
+  const salonIds = salons.map((salon: any) => salon._id).filter(Boolean);
+
+  // Fetch wishlists for the current user matching these salon IDs
+  const wishlists = await Wishlist.find({
+    user: new Types.ObjectId(userId as string),
+    entityType: WishlistEntityType.Salon,
+    entity: { $in: salonIds },
+  })
+    .select('entity')
+    .lean();
+
+  const wishlistSet = new Set(wishlists.map(w => w.entity.toString()));
+
+  // Map isWishlist onto the salon object (or the salon item)
+  const data = salons.map((salon: any) => {
+    const isWishlist = wishlistSet.has(salon._id.toString());
+
+    return { ...salon, isWishlist };
+  });
 
   return { data, pagination };
 };

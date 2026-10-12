@@ -3,17 +3,14 @@ import { WalletServices } from './wallet.service';
 import catchAsync from '../../../shared/catchAsync';
 import sendResponse from '../../../shared/sendResponse';
 import { StatusCodes } from 'http-status-codes';
-import { PayoutProvider, SupportedCurrency } from './wallet.constants';
+import { PayoutProvider } from './wallet.constants';
 
 // connect payout method controller
 const connectPayoutMethod = catchAsync(async (req: Request, res: Response) => {
   const result = await WalletServices.connectPayoutMethodService({
     ...req.body,
     user: req.user.id,
-    provider:
-      req.body.currency === SupportedCurrency.USD
-        ? PayoutProvider.STRIPE
-        : PayoutProvider.CHAPA,
+    provider: PayoutProvider.STRIPE,
   });
 
   sendResponse(res, {

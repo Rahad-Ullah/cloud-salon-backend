@@ -25,6 +25,7 @@ const updateAppointment = catchAsync(async (req: Request, res: Response) => {
   const result = await AppointmentServices.updateAppointment(
     req.params.id,
     req.body,
+    req.user,
   );
 
   sendResponse(res, {

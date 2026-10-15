@@ -1,0 +1,64 @@
+name: 🧪 Automated Tests & Lint
+
+on:
+  push:
+    branches:
+      - main
+      - master
+      - stage
+      - dev
+  pull_request:
+    branches:
+      - main
+      - master
+      - stage
+      - dev
+
+jobs:
+  test:
+    name: Run Unit & Integration Tests
+    runs-on: ubuntu-latest
+
+    env:
+      NODE_ENV: test
+      PORT: 5000
+      BCRYPT_SALT_ROUNDS: 10
+      JWT_SECRET: test_jwt_secret_key_12345
+      JWT_EXPIRE_IN: 1d
+      JWT_REFRESH_SECRET: test_jwt_refresh_secret_key_12345
+      JWT_REFRESH_EXPIRE_IN: 30d
+      STRIPE_SECRET_KEY: sk_test_mock_secret_key
+      STRIPE_API_VERSION: 2024-06-20
+      GEMINI_API_KEY: test_gemini_api_key_12345
+      AWS_REGION: us-east-1
+      AWS_ACCESS_KEY_ID: test_aws_access_key
+      AWS_SECRET_ACCESS_KEY: test_aws_secret_key
+      S3_BUCKET_NAME: test_bucket
+      MEDIA_SERVER_URL: https://media.example.com
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: 'yarn'
+
+      - name: Install Dependencies
+        run: yarn install --frozen-lockfile --ignore-engines
+
+      - name: Run ESLint Check
+        run: yarn lint:check
+
+      - name: Run Tests with Coverage
+        run: yarn test:coverage
+
+      - name: Upload Test Coverage Artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-coverage-report
+          path: coverage/
+          retention-days: 14

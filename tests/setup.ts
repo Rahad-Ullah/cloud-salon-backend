@@ -1,4 +1,4 @@
-import { MongoMemoryServer } from 'mongodb-memory-server';
+import { MongoMemoryReplSet } from 'mongodb-memory-server';
 import mongoose from 'mongoose';
 import { afterAll, afterEach, beforeAll } from 'vitest';
 
@@ -11,7 +11,7 @@ import './mocks/s3.mock';
 import './mocks/stripe.mock';
 import './mocks/gemini.mock';
 
-let mongoServer: MongoMemoryServer;
+let replSet: MongoMemoryReplSet;
 
 beforeAll(async () => {
   // Set required test env vars if not set
@@ -24,9 +24,9 @@ beforeAll(async () => {
     process.env.JWT_REFRESH_EXPIRE_IN || '30d';
   process.env.BCRYPT_SALT_ROUNDS = process.env.BCRYPT_SALT_ROUNDS || '10';
 
-  // Start ephemeral in-memory MongoDB
-  mongoServer = await MongoMemoryServer.create();
-  const uri = mongoServer.getUri();
+  // Start ephemeral in-memory MongoDB Replica Set to support transactions
+  replSet = await MongoMemoryReplSet.create({ replSet: { count: 1 } });
+  const uri = replSet.getUri();
   await mongoose.connect(uri);
 });
 
@@ -41,7 +41,8 @@ afterEach(async () => {
 afterAll(async () => {
   // Gracefully terminate database connections
   await mongoose.disconnect();
-  if (mongoServer) {
-    await mongoServer.stop();
+  if (replSet) {
+    await replSet.stop();
   }
 });
+

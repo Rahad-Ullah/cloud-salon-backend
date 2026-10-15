@@ -17,6 +17,17 @@ const createAdmin = async (payload: IUser & IAdmin): Promise<any> => {
 
   const { permissions, ...userData } = payload;
 
+  if ((userData as any).name && !userData.firstName) {
+    const nameParts = (userData as any).name.trim().split(' ');
+    userData.firstName = nameParts[0];
+    userData.lastName = nameParts.slice(1).join(' ') || nameParts[0];
+    delete (userData as any).name;
+  }
+
+  if (typeof (userData as any).phone === 'string') {
+    userData.phone = { countryCode: '', number: (userData as any).phone };
+  }
+
   userData.role = UserRole.Admin;
   userData.isEmailVerified = true;
   userData.status = UserStatus.Active;
@@ -93,6 +104,17 @@ const updateAdmin = async (
 
     // Step A: If there are user fields to update, execute the User update
     if (Object.keys(userData).length > 0) {
+      if ((userData as any).name) {
+        const nameParts = (userData as any).name.trim().split(' ');
+        userData.firstName = nameParts[0];
+        userData.lastName = nameParts.slice(1).join(' ') || nameParts[0];
+        delete (userData as any).name;
+      }
+
+      if (typeof (userData as any).phone === 'string') {
+        userData.phone = { countryCode: '', number: (userData as any).phone };
+      }
+
       const updatedUser = await User.findByIdAndUpdate(
         userId, // The referenced userId
         { $set: userData },

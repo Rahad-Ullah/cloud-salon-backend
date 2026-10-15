@@ -35,13 +35,23 @@ const createSalonValidation = z.object({
       .string({ required_error: 'Business type is required' })
       .trim(),
     description: z.string().optional().default(''),
-    logo: z.string().url('Invalid logo URL').optional().default(''),
+    logo: z
+      .string()
+      .url('Invalid logo URL')
+      .or(z.literal(''))
+      .optional()
+      .default(''),
     photos: z.array(z.string().url('Invalid photo URL')).optional().default([]),
     email: z
       .string({ required_error: 'Email is required' })
       .email('Invalid email address'),
     phone: z.string({ required_error: 'Phone number is required' }).trim(),
-    website: z.string().url('Invalid website URL').optional().default(''),
+    website: z
+      .string()
+      .url('Invalid website URL')
+      .or(z.literal(''))
+      .optional()
+      .default(''),
     instagram: z.string().optional().default(''),
     availability: z.array(availabilityValidationSchema).optional().default([]),
     address: addressValidationSchema,
@@ -57,11 +67,19 @@ const updateSalonValidation = z.object({
     name: z.string().trim().optional(),
     businessType: z.string().trim().optional(),
     description: z.string().optional(),
-    logo: z.string().url('Invalid logo URL').optional(),
+    logo: z
+      .string()
+      .url('Invalid logo URL')
+      .or(z.literal(''))
+      .optional(),
     photos: z.array(z.string().url('Invalid photo URL')).optional(),
     email: z.string().email('Invalid email address').optional(),
     phone: z.string().trim().optional(),
-    website: z.string().url('Invalid website URL').optional(),
+    website: z
+      .string()
+      .url('Invalid website URL')
+      .or(z.literal(''))
+      .optional(),
     instagram: z.string().optional(),
     availability: z.array(availabilityValidationSchema.partial()).optional(),
     address: addressValidationSchema.partial().optional(),

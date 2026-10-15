@@ -5,7 +5,12 @@ const createChairValidation = z.object({
   body: z.object({
     name: z.string({ required_error: 'Name is required' }).trim(),
     description: z.string().trim().optional().default(''),
-    photo: z.string().url('Invalid photo URL').optional().default(''),
+    photo: z
+      .string()
+      .url('Invalid photo URL')
+      .or(z.literal(''))
+      .optional()
+      .default(''),
     location: z.string({ required_error: 'Location is required' }).trim(),
     pricePerDayInUSD: z
       .number({ required_error: 'Price per day is required' })
@@ -20,7 +25,11 @@ const updateChairValidation = z.object({
   body: z.object({
     name: z.string().trim().optional(),
     description: z.string().trim().optional(),
-    photo: z.string().url('Invalid photo URL').optional(),
+    photo: z
+      .string()
+      .url('Invalid photo URL')
+      .or(z.literal(''))
+      .optional(),
     location: z.string().trim().optional(),
     pricePerDayInUSD: z
       .number()

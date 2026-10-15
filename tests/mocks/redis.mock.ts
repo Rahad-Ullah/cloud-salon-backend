@@ -25,6 +25,7 @@ export class MockRedlock {
     release: vi.fn().mockResolvedValue(undefined),
     extend: vi.fn().mockResolvedValue(undefined),
   });
+  release = vi.fn().mockResolvedValue(undefined);
   using = vi.fn().mockImplementation(async (_resources: any, _ttl: any, routine: any) => {
     return routine({ release: vi.fn() });
   });

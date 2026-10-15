@@ -240,6 +240,7 @@ const getRentalsByProfessionalId = async (
     rentalQuery.modelQuery
       .populate('salon', 'name bio logo email phone')
       .populate('chair')
+      .populate('professional', 'firstName lastName image email phone')
       .lean(),
     rentalQuery.getPaginationInfo(),
   ]);

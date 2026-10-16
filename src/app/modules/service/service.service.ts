@@ -29,28 +29,33 @@ const createService = async (payload: IService): Promise<IService> => {
 
 // ----------------- update service -----------------
 const updateService = async (id: string, payload: Partial<IService>) => {
+  const existingService = await Service.findById(id);
+  if (!existingService) {
+    throw new ApiError(StatusCodes.NOT_FOUND, 'Service not found');
+  }
+
   // check if the category exists
-  const category = await Category.exists({ _id: payload.category });
-  if (!category) {
-    throw new ApiError(StatusCodes.NOT_FOUND, 'Category not found');
+  if (payload.category) {
+    const category = await Category.exists({ _id: payload.category });
+    if (!category) {
+      throw new ApiError(StatusCodes.NOT_FOUND, 'Category not found');
+    }
   }
 
   // check if name already taken
-  const isNameTaken = await Service.exists({
-    name: payload.name,
-    _id: { $ne: id },
-    createdBy: payload.createdBy,
-    isDeleted: false,
-  });
-  if (isNameTaken) {
-    throw new ApiError(StatusCodes.CONFLICT, 'Name already taken');
+  if (payload.name) {
+    const isNameTaken = await Service.exists({
+      name: payload.name,
+      _id: { $ne: id },
+      createdBy: existingService.createdBy,
+      isDeleted: false,
+    });
+    if (isNameTaken) {
+      throw new ApiError(StatusCodes.CONFLICT, 'Name already taken');
+    }
   }
 
   const result = await Service.findByIdAndUpdate(id, payload, { new: true });
-
-  if (!result) {
-    throw new ApiError(StatusCodes.NOT_FOUND, 'Service not found');
-  }
   return result;
 };
 

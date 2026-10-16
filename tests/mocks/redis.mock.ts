@@ -8,6 +8,15 @@ export const redisMockInstance = {
   disconnect: vi.fn().mockResolvedValue(undefined),
   on: vi.fn(),
   status: 'ready',
+  zrem: vi.fn().mockResolvedValue(1),
+  zadd: vi.fn().mockResolvedValue(1),
+  zrangebyscore: vi.fn().mockResolvedValue([]),
+  expire: vi.fn().mockResolvedValue(1),
+  pipeline: vi.fn().mockReturnValue({
+    zadd: vi.fn().mockReturnThis(),
+    zrem: vi.fn().mockReturnThis(),
+    exec: vi.fn().mockResolvedValue([]),
+  }),
 };
 
 export class MockRedis {
@@ -18,6 +27,11 @@ export class MockRedis {
   disconnect = redisMockInstance.disconnect;
   on = redisMockInstance.on;
   status = 'ready';
+  zrem = redisMockInstance.zrem;
+  zadd = redisMockInstance.zadd;
+  zrangebyscore = redisMockInstance.zrangebyscore;
+  expire = redisMockInstance.expire;
+  pipeline = redisMockInstance.pipeline;
 }
 
 export class MockRedlock {

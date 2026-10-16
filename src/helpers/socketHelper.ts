@@ -45,12 +45,10 @@ const socket = (io: Server) => {
     // Join personal user room for targeting specific users
     socket.join(`user:${userId}`);
 
-    // Update user online status
-    try {
-      await User.findByIdAndUpdate(userId, { isOnline: true });
-    } catch (err) {
+    // Update user online status asynchronously without blocking event listener registration
+    User.findByIdAndUpdate(userId, { isOnline: true }).catch(err => {
       logger.error(`[Socket] Error setting online status for user ${userId}:`, err);
-    }
+    });
 
     // ----- JOIN CHAT ROOM -----
     socket.on('room:join', async (payload: any, ack?: AckCallback) => {

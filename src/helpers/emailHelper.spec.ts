@@ -1,0 +1,21 @@
+import { describe, expect, it } from 'vitest';
+import { emailHelper } from './emailHelper';
+import { sendMailSpy } from '../../tests/mocks/nodemailer.mock';
+
+describe('emailHelper', () => {
+  it('should call nodemailer transporter sendMail with formatted parameters', async () => {
+    await emailHelper.sendEmail({
+      to: 'client@example.com',
+      subject: 'Appointment Confirmed',
+      html: '<p>Your appointment is set.</p>',
+    });
+
+    expect(sendMailSpy).toHaveBeenCalledWith(
+      expect.objectContaining({
+        to: 'client@example.com',
+        subject: 'Appointment Confirmed',
+        html: '<p>Your appointment is set.</p>',
+      }),
+    );
+  });
+});

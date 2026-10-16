@@ -1,8 +1,9 @@
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
+import s3Client from '../config/aws-s3';
 import deleteS3File from './deleteS3File';
-import { s3SendSpy } from '../../tests/mocks/s3.mock';
 
 describe('deleteS3File Shared Utility', () => {
+  const s3SendSpy = vi.spyOn(s3Client, 'send').mockResolvedValue({} as any);
   it('should extract s3 key from full URL and invoke s3Client.send', async () => {
     s3SendSpy.mockClear();
 

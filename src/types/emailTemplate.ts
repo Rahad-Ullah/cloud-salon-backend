@@ -1,10 +1,12 @@
 
 export type ICreateAccount = {
+  name?: string;
   email: string;
   otp: number;
 };
 
 export type IResetPassword = {
+  name?: string;
   email: string;
   otp: number;
 };

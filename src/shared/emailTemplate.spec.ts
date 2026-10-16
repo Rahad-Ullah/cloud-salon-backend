@@ -28,12 +28,14 @@ describe('emailTemplate Shared Utility', () => {
 
   it('should generate lowBalanceWarning email with gateway details and shortfall calculation', () => {
     const email = emailTemplate.lowBalanceWarning({
+      adminEmail: 'admin@example.com',
       gatewayName: 'Stripe',
       currentBalance: 50,
       requiredBalance: 200,
       currency: 'USD',
     });
 
+    expect(email.to).toBe('admin@example.com');
     expect(email.subject).toContain('Low Balance Warning');
     expect(email.html).toContain('Stripe');
     expect(email.html).toContain('-150'); // Shortfall = 200 - 50 = 150

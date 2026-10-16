@@ -45,10 +45,7 @@ const createSupport = async (payload: Partial<ISupport>) => {
 const updateSupport = async (id: string, payload: ISupport) => {
   const result = await Support.findByIdAndUpdate(id, payload, { new: true });
   if (!result) {
-    throw new ApiError(
-      StatusCodes.INTERNAL_SERVER_ERROR,
-      'Failed to update support. Please try again later.',
-    );
+    throw new ApiError(StatusCodes.NOT_FOUND, 'Support ticket not found');
   }
   return result;
 };
@@ -59,6 +56,9 @@ const getSingleById = async (id: string) => {
     'user',
     'firstName lastName email role phone image',
   );
+  if (!result) {
+    throw new ApiError(StatusCodes.NOT_FOUND, 'Support ticket not found');
+  }
   return result;
 };
 

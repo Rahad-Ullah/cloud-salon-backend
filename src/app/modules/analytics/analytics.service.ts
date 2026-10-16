@@ -54,7 +54,7 @@ const getCustomerOverview = async (userId: string) => {
       },
     ]),
     Review.countDocuments({ user: userId, isDeleted: false }),
-    Wishlist.countDocuments({ user: userId, isDeleted: false }),
+    Wishlist.countDocuments({ user: userId }),
   ]);
 
   const facet = appointmentCounts[0];

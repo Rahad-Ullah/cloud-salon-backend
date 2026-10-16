@@ -14,13 +14,18 @@ import mongoose, { Types } from 'mongoose';
 // Reusable helper to recalculate average and count via aggregation
 const recalculateEntityRating = async (
   entityType: EntityType,
-  entityId: Types.ObjectId,
+  entityId: Types.ObjectId | string,
   session: mongoose.ClientSession,
 ): Promise<void> => {
+  const targetId =
+    typeof entityId === 'string'
+      ? new mongoose.Types.ObjectId(entityId)
+      : entityId;
+
   const stats = await Review.aggregate([
     {
       $match: {
-        entity: entityId,
+        entity: targetId,
         entityType,
         isDeleted: false,
       },
@@ -40,13 +45,13 @@ const recalculateEntityRating = async (
 
   if (entityType === EntityType.Salon) {
     await Salon.findByIdAndUpdate(
-      entityId,
+      targetId,
       { avgRating, totalReviews },
       { session },
     );
   } else {
     await Professional.findOneAndUpdate(
-      { user: entityId },
+      { user: targetId },
       { avgRating, totalReviews },
       { session },
     );
